@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rtk gradlew *)",
+      "Bash(rtk read *)",
+      "Bash(rtk curl *)",
+      "Bash(grep -v \"^$\")",
+      "Bash(rtk find *)",
+      "Bash(rtk ls *)",
+      "Bash(rtk grep *)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('Tables:', [t['tableName'] for t in d['database']['entities']]\\)\")"
+    ]
+  }
+}

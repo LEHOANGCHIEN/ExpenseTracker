@@ -511,8 +511,8 @@ private fun TagsSection(
             }
         }
         if (tags.isNotEmpty()) {
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            Column(
+                verticalArrangement = Arrangement.spacedBy(6.dp),
                 modifier = Modifier.padding(top = 6.dp),
             ) {
                 tags.forEach { tag ->

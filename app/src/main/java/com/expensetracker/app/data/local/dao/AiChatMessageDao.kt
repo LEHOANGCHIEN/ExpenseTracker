@@ -19,6 +19,9 @@ interface AiChatMessageDao {
     @Query("DELETE FROM ai_chat_messages WHERE sessionId = :sessionId")
     suspend fun deleteSession(sessionId: String)
 
+    @Query("SELECT sessionId FROM ai_chat_messages ORDER BY timestamp DESC LIMIT 1")
+    suspend fun getLatestSessionId(): String?
+
     @Query("DELETE FROM ai_chat_messages")
     suspend fun deleteAll()
 }

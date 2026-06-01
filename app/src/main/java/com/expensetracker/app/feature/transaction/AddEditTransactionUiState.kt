@@ -43,6 +43,7 @@ data class AddEditTransactionUiState(
     val showSplitDialog: Boolean = false,
     val isDone: Boolean = false,
     val error: String? = null,
+    val aiCategorySuggestion: Long? = null,
 ) {
     val canSave: Boolean
         get() = resolvedAmount > 0.0 && categoryId != null && !isSaving &&

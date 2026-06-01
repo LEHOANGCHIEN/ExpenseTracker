@@ -30,6 +30,7 @@ data class TransactionListUiState(
     val searchQuery: String = "",
     val filter: TransactionFilter = TransactionFilter(),
     val isLoading: Boolean = true,
+    val isRefreshing: Boolean = false,
     val selectedIds: Set<Long> = emptySet(),
     val pendingDeleteTransaction: Transaction? = null,
     val currency: String = "VND",
@@ -49,4 +50,5 @@ sealed interface TransactionListUiEvent {
     data class BulkDelete(val ids: Set<Long>) : TransactionListUiEvent
     data object ShowFilterSheet : TransactionListUiEvent
     data object HideFilterSheet : TransactionListUiEvent
+    data object Refresh : TransactionListUiEvent
 }

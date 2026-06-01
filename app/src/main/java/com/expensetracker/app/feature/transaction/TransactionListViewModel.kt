@@ -107,6 +107,10 @@ class TransactionListViewModel @Inject constructor(
             is TransactionListUiEvent.BulkDelete -> bulkDelete(event.ids)
             TransactionListUiEvent.ShowFilterSheet -> _showFilterSheet.value = true
             TransactionListUiEvent.HideFilterSheet -> _showFilterSheet.value = false
+            TransactionListUiEvent.Refresh -> viewModelScope.launch {
+                // Data refreshes automatically from Room Flow; just signal refresh briefly
+                kotlinx.coroutines.delay(300)
+            }
         }
     }
 

@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -174,39 +175,46 @@ fun TransactionListScreen(
                     .padding(padding),
             )
             else -> {
-                LazyColumn(modifier = Modifier.padding(padding)) {
-                    state.groupedTransactions.entries
-                        .sortedByDescending { it.key }
-                        .forEach { (date, transactions) ->
-                            stickyHeader(key = "header_${date}") {
-                                DateGroupHeader(date = date)
-                            }
-                            items(
-                                items = transactions,
-                                key = { it.id },
-                            ) { transaction ->
-                                TransactionListItem(
-                                    transaction = transaction,
-                                    category = state.categories[transaction.categoryId],
-                                    currency = state.currency,
-                                    isSelected = transaction.id in state.selectedIds,
-                                    onCLick = {
-                                        if (state.isInSelectionMode) {
+                PullToRefreshBox(
+                    isRefreshing = state.isRefreshing,
+                    onRefresh = { viewModel.onEvent(TransactionListUiEvent.Refresh) },
+                    modifier = Modifier.padding(padding),
+                ) {
+                    LazyColumn(modifier = Modifier.fillMaxSize()) {
+                        state.groupedTransactions.entries
+                            .sortedByDescending { it.key }
+                            .forEach { (date, transactions) ->
+                                stickyHeader(key = "header_${date}") {
+                                    DateGroupHeader(date = date)
+                                }
+                                items(
+                                    items = transactions,
+                                    key = { it.id },
+                                ) { transaction ->
+                                    TransactionListItem(
+                                        transaction = transaction,
+                                        category = state.categories[transaction.categoryId],
+                                        currency = state.currency,
+                                        isSelected = transaction.id in state.selectedIds,
+                                        onCLick = {
+                                            if (state.isInSelectionMode) {
+                                                viewModel.onEvent(TransactionListUiEvent.ToggleSelect(transaction.id))
+                                            } else {
+                                                onNavigateToDetail(transaction.id)
+                                            }
+                                        },
+                                        onLongClick = {
                                             viewModel.onEvent(TransactionListUiEvent.ToggleSelect(transaction.id))
-                                        } else {
-                                            onNavigateToDetail(transaction.id)
-                                        }
-                                    },
-                                    onLongClick = {
-                                        viewModel.onEvent(TransactionListUiEvent.ToggleSelect(transaction.id))
-                                    },
-                                    onDismissed = {
-                                        viewModel.onEvent(TransactionListUiEvent.DeleteTransaction(transaction.id))
-                                    },
-                                )
-                                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+                                        },
+                                        onDismissed = {
+                                            viewModel.onEvent(TransactionListUiEvent.DeleteTransaction(transaction.id))
+                                        },
+                                        modifier = Modifier.animateItem(),
+                                    )
+                                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+                                }
                             }
-                        }
+                    }
                 }
             }
         }

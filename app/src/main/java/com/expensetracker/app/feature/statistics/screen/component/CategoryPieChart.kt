@@ -1,5 +1,8 @@
 package com.expensetracker.app.feature.statistics.screen.component
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -7,6 +10,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -44,6 +48,13 @@ fun CategoryPieChart(
     }
     val trackColor = MaterialTheme.colorScheme.surfaceVariant
 
+    // Animate the overall sweep from 0 → 360 on first display, and re-animate on data change
+    val animatedSweep by animateFloatAsState(
+        targetValue = 360f,
+        animationSpec = tween(durationMillis = 800, easing = FastOutSlowInEasing),
+        label = "pie_sweep",
+    )
+
     Box(
         modifier = modifier.size(200.dp),
         contentAlignment = Alignment.Center,
@@ -65,20 +76,22 @@ fun CategoryPieChart(
                 style = Stroke(width = strokeWidth, cap = StrokeCap.Butt),
             )
 
-            // Draw slices
+            // Draw slices proportional to the animated sweep progress
+            val sweepScale = animatedSweep / 360f
             var startAngle = -90f
             categories.forEachIndexed { index, item ->
-                val sweep = 360f * item.percentage.coerceIn(0f, 1f)
+                val fullSweep = 360f * item.percentage.coerceIn(0f, 1f)
+                val animatedSliceSweep = fullSweep * sweepScale
                 drawArc(
                     color = sliceColors[index],
                     startAngle = startAngle,
-                    sweepAngle = sweep,
+                    sweepAngle = animatedSliceSweep,
                     useCenter = false,
                     topLeft = topLeft,
                     size = arcSize,
                     style = Stroke(width = strokeWidth, cap = StrokeCap.Butt),
                 )
-                startAngle += sweep
+                startAngle += animatedSliceSweep
             }
         }
 

@@ -39,6 +39,7 @@ data class StatisticsUiState(
 
     val isLoading: Boolean = true,
     val currency: String = "VND",
+    val isGeneratingInsights: Boolean = false,
 
     // Custom period date picker state
     val showCustomStartPicker: Boolean = false,
@@ -59,4 +60,5 @@ sealed interface StatisticsEvent {
     data object HideCustomStartPicker : StatisticsEvent
     data object ShowCustomEndPicker : StatisticsEvent
     data object HideCustomEndPicker : StatisticsEvent
+    data object RefreshInsights : StatisticsEvent
 }

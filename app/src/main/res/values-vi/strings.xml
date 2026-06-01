@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App -->
+    <string name="app_name">Quản Lý Chi Tiêu</string>
+    <string name="app_tagline">Kiểm soát tài chính của bạn</string>
+
+    <!-- Common actions -->
+    <string name="action_save">Lưu</string>
+    <string name="action_cancel">Hủy</string>
+    <string name="action_delete">Xóa</string>
+    <string name="action_back">Quay lại</string>
+    <string name="action_retry">Thử lại</string>
+    <string name="action_skip">Bỏ qua</string>
+    <string name="action_next">Tiếp theo</string>
+    <string name="action_get_started">Bắt đầu</string>
+    <string name="action_see_all">Xem tất cả</string>
+    <string name="action_use_this">Sử dụng</string>
+    <string name="action_scan_again">Quét lại</string>
+
+    <!-- Home -->
+    <string name="home_total_balance">Tổng số dư</string>
+    <string name="home_income">Thu nhập</string>
+    <string name="home_expense">Chi tiêu</string>
+    <string name="home_recent_transactions">Giao dịch gần đây</string>
+    <string name="home_empty_title">Chưa có giao dịch</string>
+    <string name="home_empty_message">Thêm giao dịch đầu tiên để bắt đầu</string>
+    <string name="home_add_transaction">Thêm giao dịch</string>
+
+    <!-- Transactions -->
+    <string name="transaction_empty_title">Không có giao dịch</string>
+    <string name="transaction_empty_message">Thêm giao dịch đầu tiên để bắt đầu</string>
+    <string name="transaction_deleted">Đã xóa giao dịch</string>
+    <string name="transaction_undo">Hoàn tác</string>
+    <string name="transaction_note_hint">Giao dịch này là gì?</string>
+
+    <!-- Categories -->
+    <string name="category_empty_title">Không có danh mục</string>
+    <string name="category_empty_message">Tạo danh mục tùy chỉnh đầu tiên</string>
+
+    <!-- Budgets -->
+    <string name="budget_empty_title">Không có ngân sách</string>
+    <string name="budget_empty_message">Đặt ngân sách để theo dõi giới hạn chi tiêu</string>
+
+    <!-- Wallets -->
+    <string name="wallet_empty_title">Không có ví</string>
+    <string name="wallet_empty_message">Thêm ví để bắt đầu theo dõi tài chính</string>
+
+    <!-- Recurring -->
+    <string name="recurring_empty_title">Không có giao dịch định kỳ</string>
+    <string name="recurring_empty_message">Thiết lập giao dịch định kỳ để tự động hóa chi phí thường xuyên</string>
+
+    <!-- Statistics -->
+    <string name="statistics_refresh_insights">Làm mới thống kê ✨</string>
+    <string name="statistics_generating_insights">Đang tạo thống kê…</string>
+
+    <!-- AI Assistant -->
+    <string name="ai_title">Trợ lý AI ✨</string>
+    <string name="ai_subtitle">Hỏi tôi bất cứ điều gì về tài chính của bạn</string>
+    <string name="ai_new_chat">Cuộc trò chuyện mới</string>
+    <string name="ai_clear_history">Xóa lịch sử</string>
+    <string name="ai_input_hint">Hỏi về tài chính của bạn…</string>
+    <string name="copied_to_clipboard">Đã sao chép</string>
+
+    <!-- OCR Scanner -->
+    <string name="ocr_title">Quét hóa đơn</string>
+    <string name="ocr_scanning">Đang đọc hóa đơn…</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Cài đặt</string>
+    <string name="settings_clear_data_title">Xóa tất cả dữ liệu?</string>
+    <string name="settings_clear_data_message">Thao tác này sẽ xóa vĩnh viễn tất cả giao dịch, ví, danh mục và ngân sách. Không thể hoàn tác.</string>
+    <string name="settings_export_success">Xuất dữ liệu thành công</string>
+    <string name="settings_import_success">Nhập dữ liệu thành công</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_welcome_title">Quản Lý Chi Tiêu</string>
+    <string name="onboarding_track_title">Theo dõi trong vài giây</string>
+    <string name="onboarding_ai_title">Thống kê thông minh AI</string>
+    <string name="onboarding_setup_title">Thiết lập nhanh</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_budget">Cảnh báo ngân sách</string>
+    <string name="notification_channel_reminder">Nhắc nhở hằng ngày</string>
+    <string name="notification_channel_recurring">Giao dịch định kỳ</string>
+    <string name="notification_channel_insights">Thống kê AI</string>
+    <string name="notification_reminder_title">Đừng quên chi tiêu hôm nay!</string>
+    <string name="notification_reminder_message">Bạn đã ghi lại chi tiêu hôm nay chưa? Nhấn để thêm giao dịch.</string>
+    <string name="notification_recurring_title">Đã tạo giao dịch định kỳ</string>
+    <string name="notification_insights_title">Thống kê AI mới ✨</string>
+
+    <!-- Errors -->
+    <string name="error_generic">Đã xảy ra lỗi. Vui lòng thử lại.</string>
+    <string name="error_network">Không có kết nối internet</string>
+</resources>

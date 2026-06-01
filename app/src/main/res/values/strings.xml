@@ -1,3 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">ExpenseTracker</string>
+    <!-- App -->
+    <string name="app_name">Expense Tracker</string>
+    <string name="app_tagline">Take control of your finances</string>
+
+    <!-- Common actions -->
+    <string name="action_save">Save</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_back">Back</string>
+    <string name="action_retry">Try Again</string>
+    <string name="action_skip">Skip</string>
+    <string name="action_next">Next</string>
+    <string name="action_get_started">Get Started</string>
+    <string name="action_see_all">See all</string>
+    <string name="action_use_this">Use This</string>
+    <string name="action_scan_again">Scan Again</string>
+
+    <!-- Home -->
+    <string name="home_total_balance">Total Balance</string>
+    <string name="home_income">Income</string>
+    <string name="home_expense">Expense</string>
+    <string name="home_recent_transactions">Recent Transactions</string>
+    <string name="home_empty_title">No transactions yet</string>
+    <string name="home_empty_message">Add your first transaction to get started</string>
+    <string name="home_add_transaction">Add Transaction</string>
+
+    <!-- Transactions -->
+    <string name="transaction_empty_title">No transactions</string>
+    <string name="transaction_empty_message">Add your first transaction to get started</string>
+    <string name="transaction_deleted">Transaction deleted</string>
+    <string name="transaction_undo">Undo</string>
+    <string name="transaction_note_hint">What was this for?</string>
+
+    <!-- Categories -->
+    <string name="category_empty_title">No categories</string>
+    <string name="category_empty_message">Create your first custom category</string>
+
+    <!-- Budgets -->
+    <string name="budget_empty_title">No budgets</string>
+    <string name="budget_empty_message">Set a budget to track your spending limits</string>
+
+    <!-- Wallets -->
+    <string name="wallet_empty_title">No wallets</string>
+    <string name="wallet_empty_message">Add a wallet to start tracking your finances</string>
+
+    <!-- Recurring -->
+    <string name="recurring_empty_title">No recurring transactions</string>
+    <string name="recurring_empty_message">Set up recurring transactions to automate regular expenses</string>
+
+    <!-- Statistics -->
+    <string name="statistics_refresh_insights">Refresh insights ✨</string>
+    <string name="statistics_generating_insights">Generating insights…</string>
+
+    <!-- AI Assistant -->
+    <string name="ai_title">AI Assistant ✨</string>
+    <string name="ai_subtitle">Ask me anything about your finances</string>
+    <string name="ai_new_chat">New chat</string>
+    <string name="ai_clear_history">Clear history</string>
+    <string name="ai_input_hint">Ask about your finances…</string>
+    <string name="copied_to_clipboard">Copied to clipboard</string>
+
+    <!-- OCR Scanner -->
+    <string name="ocr_title">Scan Receipt</string>
+    <string name="ocr_scanning">Reading receipt…</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_clear_data_title">Clear all data?</string>
+    <string name="settings_clear_data_message">This will permanently delete all transactions, wallets, categories, and budgets. This cannot be undone.</string>
+    <string name="settings_export_success">Data exported successfully</string>
+    <string name="settings_import_success">Data imported successfully</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_welcome_title">Expense Tracker</string>
+    <string name="onboarding_track_title">Track in seconds</string>
+    <string name="onboarding_ai_title">AI-powered insights</string>
+    <string name="onboarding_setup_title">Quick Setup</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_budget">Budget Alerts</string>
+    <string name="notification_channel_reminder">Daily Reminder</string>
+    <string name="notification_channel_recurring">Recurring Transactions</string>
+    <string name="notification_channel_insights">AI Insights</string>
+    <string name="notification_reminder_title">Don\'t forget your expenses!</string>
+    <string name="notification_reminder_message">Did you log your expenses today? Tap to add a transaction.</string>
+    <string name="notification_recurring_title">Recurring Transactions Created</string>
+    <string name="notification_insights_title">New AI Insights ✨</string>
+
+    <!-- Errors -->
+    <string name="error_generic">Something went wrong. Please try again.</string>
+    <string name="error_network">No internet connection</string>
 </resources>

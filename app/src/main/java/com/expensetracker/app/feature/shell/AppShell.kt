@@ -1,17 +1,29 @@
 package com.expensetracker.app.feature.shell
 
+import android.app.Activity
+import android.content.Intent
+import android.speech.RecognizerIntent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -20,11 +32,17 @@ import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -33,18 +51,25 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -53,6 +78,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.expensetracker.app.core.designsystem.component.AppPrimaryButton
 import com.expensetracker.app.core.designsystem.component.AppTextField
+import com.expensetracker.app.domain.model.TransactionType
 import com.expensetracker.app.navigation.AddEditTransaction
 import com.expensetracker.app.navigation.AiAssistant
 import com.expensetracker.app.navigation.AppNavHost
@@ -67,10 +93,11 @@ import com.expensetracker.app.navigation.Statistics
 import com.expensetracker.app.navigation.TransactionDetail
 import com.expensetracker.app.navigation.TransactionList
 import com.expensetracker.app.navigation.WalletManagement
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppShell() {
+fun AppShell(startDestination: Any = Home) {
     val navController = rememberNavController()
     var showQuickAdd by remember { mutableStateOf(false) }
 
@@ -79,13 +106,18 @@ fun AppShell() {
 
     val showBottomBar = currentDest.isTabDestination()
 
+    // AiAssistant manages its own top bar with screen-specific actions
+    val showGlobalTopBar = currentDest?.hasRoute(AiAssistant::class) != true
+
     Scaffold(
         topBar = {
-            AppTopBar(
-                currentDest = currentDest,
-                onNavigateUp = { navController.navigateUp() },
-                onNavigateToSettings = { navController.navigate(Settings) },
-            )
+            if (showGlobalTopBar) {
+                AppTopBar(
+                    currentDest = currentDest,
+                    onNavigateUp = { navController.navigateUp() },
+                    onNavigateToSettings = { navController.navigate(Settings) },
+                )
+            }
         },
         bottomBar = {
             AnimatedVisibility(
@@ -103,12 +135,16 @@ fun AppShell() {
     ) { paddingValues ->
         AppNavHost(
             navController = navController,
+            startDestination = startDestination,
             modifier = Modifier.padding(paddingValues),
         )
     }
 
     if (showQuickAdd) {
-        QuickAddBottomSheet(onDismiss = { showQuickAdd = false })
+        QuickAddBottomSheet(
+            onDismiss = { showQuickAdd = false },
+            navController = navController,
+        )
     }
 }
 
@@ -255,12 +291,22 @@ private fun AppBottomBar(
     }
 }
 
-// ---- Quick-Add Bottom Sheet (stub) ----
+// ---- Quick-Add Bottom Sheet ----
 
-@OptIn(ExperimentalMaterial3Api::class)
+private val NL_EXAMPLES = listOf(
+    "Bought groceries 200k",
+    "Salary 15 million today",
+    "Coffee with friends 80k yesterday",
+)
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-private fun QuickAddBottomSheet(onDismiss: () -> Unit) {
+private fun QuickAddBottomSheet(
+    onDismiss: () -> Unit,
+    navController: NavController,
+) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var selectedTab by remember { mutableIntStateOf(0) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -269,40 +315,208 @@ private fun QuickAddBottomSheet(onDismiss: () -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp),
+                .padding(horizontal = 16.dp),
         ) {
-            Text(
-                text = "Quick Add",
-                style = MaterialTheme.typography.titleLarge,
-            )
+            ScrollableTabRow(
+                selectedTabIndex = selectedTab,
+                edgePadding = 0.dp,
+            ) {
+                Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 }) {
+                    Text("Manual", modifier = Modifier.padding(vertical = 12.dp))
+                }
+                Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 }) {
+                    Text("✨ AI Parse", modifier = Modifier.padding(vertical = 12.dp))
+                }
+            }
+
             Spacer(Modifier.height(16.dp))
 
-            var amount by remember { mutableStateOf("") }
-            var note by remember { mutableStateOf("") }
+            when (selectedTab) {
+                0 -> ManualQuickAddTab(
+                    onNavigateToAddTransaction = { amount, note ->
+                        onDismiss()
+                        navController.navigate(
+                            AddEditTransaction(prefillAmount = amount, prefillNote = note),
+                        )
+                    },
+                    onDismiss = onDismiss,
+                )
+                1 -> NaturalLanguageTab(
+                    onNavigateToAddTransaction = { amount, note, categoryId ->
+                        onDismiss()
+                        navController.navigate(
+                            AddEditTransaction(
+                                prefillAmount = amount,
+                                prefillNote = note,
+                                prefillCategoryId = categoryId,
+                            ),
+                        )
+                    },
+                )
+            }
 
-            AppTextField(
-                value = amount,
-                onValueChange = { amount = it },
-                label = "Amount",
-                placeholder = "0",
-            )
-            Spacer(Modifier.height(8.dp))
-            AppTextField(
-                value = note,
-                onValueChange = { note = it },
-                label = "Note",
-                placeholder = "What was this for?",
-            )
-            Spacer(Modifier.height(16.dp))
-
-            AppPrimaryButton(
-                text = "Save",
-                onClick = onDismiss,
-                modifier = Modifier.fillMaxWidth(),
-            )
-
-            // Bottom padding for gesture navigation
             Spacer(Modifier.height(32.dp))
+        }
+    }
+}
+
+@Composable
+private fun ManualQuickAddTab(
+    onNavigateToAddTransaction: (Double?, String?) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var amount by remember { mutableStateOf("") }
+    var note by remember { mutableStateOf("") }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        AppTextField(
+            value = amount,
+            onValueChange = { amount = it },
+            label = "Amount",
+            placeholder = "0",
+        )
+        Spacer(Modifier.height(8.dp))
+        AppTextField(
+            value = note,
+            onValueChange = { note = it },
+            label = "Note",
+            placeholder = "What was this for?",
+        )
+        Spacer(Modifier.height(16.dp))
+        AppPrimaryButton(
+            text = "Open Full Form",
+            onClick = { onNavigateToAddTransaction(amount.toDoubleOrNull(), note.takeIf { it.isNotBlank() }) },
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun NaturalLanguageTab(
+    viewModel: QuickAddViewModel = hiltViewModel(),
+    onNavigateToAddTransaction: (Double?, String?, Long?) -> Unit,
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val dateFmt = DateTimeFormatter.ofPattern("dd MMM yyyy")
+
+    val speechLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult(),
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val text = result.data
+                ?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+                ?.firstOrNull()
+            if (!text.isNullOrBlank()) viewModel.onInputChanged(text)
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        // Input row with voice button
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            OutlinedTextField(
+                value = state.nlInput,
+                onValueChange = viewModel::onInputChanged,
+                placeholder = { Text("Describe your expense — e.g. '50k for coffee this morning'") },
+                modifier = Modifier.weight(1f),
+                maxLines = 3,
+            )
+            Spacer(Modifier.width(8.dp))
+            IconButton(
+                onClick = {
+                    val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                        putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                        putExtra(RecognizerIntent.EXTRA_PROMPT, "Describe your transaction")
+                    }
+                    speechLauncher.launch(intent)
+                },
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Mic,
+                    contentDescription = "Voice input",
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+            }
+        }
+
+        // Example chips
+        if (state.parsedResult == null) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                NL_EXAMPLES.forEach { example ->
+                    AssistChip(
+                        onClick = { viewModel.onInputChanged(example) },
+                        label = { Text(example, style = MaterialTheme.typography.labelSmall) },
+                    )
+                }
+            }
+        }
+
+        // Parse button
+        Button(
+            onClick = viewModel::parseInput,
+            enabled = state.nlInput.isNotBlank() && !state.isLoading,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            if (state.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                )
+            } else {
+                Text("Parse with AI ✨")
+            }
+        }
+
+        // Error
+        if (state.error != null) {
+            Text(
+                text = state.error!!,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
+
+        // Parsed result preview
+        val parsed = state.parsedResult
+        if (parsed != null) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                ),
+            ) {
+                Column(
+                    modifier = Modifier.padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Text("Parsed Result", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                    Text("Amount: ${parsed.amount.toLong()}")
+                    Text("Type: ${parsed.type.name}")
+                    Text("Date: ${parsed.date.format(dateFmt)}")
+                    Text("Note: ${parsed.note}")
+                    if (state.parsedCategoryName != null) {
+                        Text("Category: ${state.parsedCategoryName}")
+                    }
+                }
+            }
+            Button(
+                onClick = {
+                    onNavigateToAddTransaction(parsed.amount, parsed.note, parsed.categoryId)
+                    viewModel.reset()
+                },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("Use This →")
+            }
         }
     }
 }

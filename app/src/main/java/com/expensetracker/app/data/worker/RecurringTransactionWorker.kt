@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.expensetracker.app.core.notification.NotificationHelper
 import com.expensetracker.app.domain.model.RecurrenceFrequency
 import com.expensetracker.app.domain.model.RecurringTransaction
 import com.expensetracker.app.domain.model.Transaction
@@ -20,23 +21,33 @@ class RecurringTransactionWorker @AssistedInject constructor(
     @Assisted workerParams: WorkerParameters,
     private val recurringRepo: RecurringTransactionRepository,
     private val transactionRepository: TransactionRepository,
+    private val notificationHelper: NotificationHelper,
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {
         return try {
             val today = LocalDate.now()
             val dueSchedules = recurringRepo.getDue(today)
+            val created = mutableListOf<String>()
 
             for (schedule in dueSchedules) {
-                processSchedule(schedule, today)
+                val count = processSchedule(schedule, today)
+                if (count > 0) {
+                    created.add("${schedule.note} (${schedule.amount.toLong()})")
+                }
             }
+
+            if (created.isNotEmpty()) {
+                notificationHelper.notifyRecurringCreated(created.size, created)
+            }
+
             Result.success()
         } catch (e: Exception) {
             Result.retry()
         }
     }
 
-    private suspend fun processSchedule(schedule: RecurringTransaction, today: LocalDate) {
+    private suspend fun processSchedule(schedule: RecurringTransaction, today: LocalDate): Int {
         var current = schedule.nextOccurrence
         var count = 0
 
@@ -70,6 +81,7 @@ class RecurringTransactionWorker @AssistedInject constructor(
                 isActive = isStillActive,
             )
         )
+        return count
     }
 
     private fun computeNextOccurrence(from: LocalDate, schedule: RecurringTransaction): LocalDate {

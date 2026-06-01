@@ -3,6 +3,7 @@ package com.expensetracker.app.feature.statistics
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.expensetracker.app.domain.model.TransactionType
+import com.expensetracker.app.domain.repository.AiRepository
 import com.expensetracker.app.domain.repository.CategoryRepository
 import com.expensetracker.app.domain.repository.PreferencesRepository
 import com.expensetracker.app.domain.repository.TransactionRepository
@@ -12,9 +13,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
 import javax.inject.Inject
@@ -25,6 +28,7 @@ class StatisticsViewModel @Inject constructor(
     private val transactionRepository: TransactionRepository,
     private val categoryRepository: CategoryRepository,
     private val preferencesRepository: PreferencesRepository,
+    private val aiRepository: AiRepository,
 ) : ViewModel() {
 
     private val _config = MutableStateFlow(buildConfig(StatPeriod.THIS_MONTH, null, null))
@@ -99,6 +103,7 @@ class StatisticsViewModel @Inject constructor(
                     topNotes = topNotes,
                     isLoading = false,
                     currency = prefs.currency,
+                    isGeneratingInsights = extras.isGeneratingInsights,
                     showCustomStartPicker = extras.showCustomStartPicker,
                     showCustomEndPicker = extras.showCustomEndPicker,
                 )
@@ -136,6 +141,21 @@ class StatisticsViewModel @Inject constructor(
             StatisticsEvent.HideCustomStartPicker -> _uiExtras.update { it.copy(showCustomStartPicker = false) }
             StatisticsEvent.ShowCustomEndPicker -> _uiExtras.update { it.copy(showCustomEndPicker = true) }
             StatisticsEvent.HideCustomEndPicker -> _uiExtras.update { it.copy(showCustomEndPicker = false) }
+            StatisticsEvent.RefreshInsights -> refreshInsights()
+        }
+    }
+
+    private fun refreshInsights() {
+        viewModelScope.launch {
+            _uiExtras.update { it.copy(isGeneratingInsights = true) }
+            runCatching {
+                val cfg = _config.value
+                val transactions = transactionRepository.observeByDateRange(cfg.start, cfg.end).first()
+                val categories = categoryRepository.observeAll().first()
+                val insights = aiRepository.generateMonthlyInsights(transactions, categories).getOrThrow()
+                aiRepository.saveInsights(insights)
+            }
+            _uiExtras.update { it.copy(isGeneratingInsights = false) }
         }
     }
 
@@ -150,6 +170,7 @@ class StatisticsViewModel @Inject constructor(
         val period: StatPeriod,
         val showCustomStartPicker: Boolean,
         val showCustomEndPicker: Boolean,
+        val isGeneratingInsights: Boolean = false,
     )
 
     private fun buildConfig(

@@ -10,17 +10,18 @@ import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Foundation class for budget threshold alerts.
- * Called after a transaction is inserted; returns budgets that have crossed
- * their alert threshold. Full notification dispatch is wired in Task 17.
- */
+data class BudgetAlertResult(
+    val budget: Budget,
+    val spentAmount: Double,
+    val spentPercentage: Double,
+)
+
 @Singleton
 class BudgetAlertChecker @Inject constructor(
     private val budgetRepository: BudgetRepository,
     private val transactionRepository: TransactionRepository,
 ) {
-    suspend fun checkThresholdsForCategory(categoryId: Long): List<Budget> {
+    suspend fun checkThresholdsForCategory(categoryId: Long): List<BudgetAlertResult> {
         val activeBudgets = budgetRepository.observeActive().first()
         val today = LocalDate.now()
 
@@ -28,7 +29,7 @@ class BudgetAlertChecker @Inject constructor(
             .filter { budget ->
                 budget.categoryId == null || budget.categoryId == categoryId
             }
-            .filter { budget ->
+            .mapNotNull { budget ->
                 val (start, end) = budget.periodDateRange(today)
                 val spent = transactionRepository.observeAll().first()
                     .filter { txn ->
@@ -39,7 +40,9 @@ class BudgetAlertChecker @Inject constructor(
                     .sumOf { it.amount }
 
                 val percentage = if (budget.amount > 0) spent / budget.amount else 0.0
-                percentage >= budget.alertThreshold
+                if (percentage >= budget.alertThreshold) {
+                    BudgetAlertResult(budget = budget, spentAmount = spent, spentPercentage = percentage)
+                } else null
             }
     }
 

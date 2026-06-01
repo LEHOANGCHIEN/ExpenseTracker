@@ -52,6 +52,9 @@ class AiRepositoryImpl @Inject constructor(
     override suspend fun clearSession(sessionId: String) =
         aiChatMessageDao.deleteSession(sessionId)
 
+    override suspend fun getLatestSessionId(): String? =
+        aiChatMessageDao.getLatestSessionId()
+
     override suspend fun dismissInsight(id: Long) =
         aiInsightDao.dismiss(id)
 

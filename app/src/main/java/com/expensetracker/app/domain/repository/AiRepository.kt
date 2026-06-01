@@ -12,6 +12,7 @@ interface AiRepository {
     fun observeUndismissedInsights(): Flow<List<AiInsight>>
     suspend fun saveChatMessage(message: AiChatMessage): Long
     suspend fun clearSession(sessionId: String)
+    suspend fun getLatestSessionId(): String?
     suspend fun dismissInsight(id: Long)
     suspend fun saveInsights(insights: List<AiInsight>)
     suspend fun sendChatMessage(history: List<AiChatMessage>, userContext: String): Result<String>

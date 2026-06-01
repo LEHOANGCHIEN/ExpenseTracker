@@ -3,13 +3,18 @@ package com.expensetracker.app.feature.transaction
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.expensetracker.app.domain.model.AiInsight
+import com.expensetracker.app.domain.model.InsightType
 import com.expensetracker.app.domain.model.Transaction
 import com.expensetracker.app.domain.model.TransactionType
+import com.expensetracker.app.domain.repository.AiRepository
 import com.expensetracker.app.domain.repository.CategoryRepository
 import com.expensetracker.app.domain.repository.PreferencesRepository
 import com.expensetracker.app.domain.repository.TransactionRepository
 import com.expensetracker.app.domain.repository.WalletRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -19,6 +24,8 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.inject.Inject
+import kotlin.math.abs
+import kotlin.math.sqrt
 
 @HiltViewModel
 class AddEditTransactionViewModel @Inject constructor(
@@ -26,10 +33,17 @@ class AddEditTransactionViewModel @Inject constructor(
     private val categoryRepository: CategoryRepository,
     private val walletRepository: WalletRepository,
     private val preferencesRepository: PreferencesRepository,
+    private val aiRepository: AiRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
+    private var categorizationJob: Job? = null
+    private val categorizationCache = HashMap<String, Long?>()
+
     private val transactionId: Long? = savedStateHandle.get<Long?>("id")
+    private val prefillAmount: Double? = savedStateHandle.get<Double?>("prefillAmount")
+    private val prefillNote: String? = savedStateHandle.get<String?>("prefillNote")
+    private val prefillCategoryId: Long? = savedStateHandle.get<Long?>("prefillCategoryId")
 
     private val _state = MutableStateFlow(AddEditTransactionUiState())
     val state: StateFlow<AddEditTransactionUiState> = _state
@@ -80,6 +94,10 @@ class AddEditTransactionViewModel @Inject constructor(
                             walletId = defaultWalletId,
                             currency = prefs.currency,
                             isLoading = false,
+                            amountExpression = prefillAmount?.let { amt -> formatAmount(amt) } ?: "0",
+                            resolvedAmount = prefillAmount ?: 0.0,
+                            note = prefillNote ?: "",
+                            categoryId = prefillCategoryId,
                         )
                     }
                 }
@@ -91,10 +109,10 @@ class AddEditTransactionViewModel @Inject constructor(
         when (event) {
             is AddEditUiEvent.AmountKeyPressed -> handleAmountKey(event.key)
             is AddEditUiEvent.TypeChanged -> _state.update {
-                it.copy(type = event.type, categoryId = null)
+                it.copy(type = event.type, categoryId = null, aiCategorySuggestion = null)
             }
             is AddEditUiEvent.CategorySelected -> _state.update {
-                it.copy(categoryId = event.categoryId, showCategoryPicker = false)
+                it.copy(categoryId = event.categoryId, showCategoryPicker = false, aiCategorySuggestion = null)
             }
             is AddEditUiEvent.WalletSelected -> _state.update {
                 it.copy(walletId = event.walletId)
@@ -105,8 +123,9 @@ class AddEditTransactionViewModel @Inject constructor(
             is AddEditUiEvent.DateChanged -> _state.update {
                 it.copy(date = event.date, showDatePicker = false)
             }
-            is AddEditUiEvent.NoteChanged -> _state.update {
-                it.copy(note = event.note.take(200))
+            is AddEditUiEvent.NoteChanged -> {
+                _state.update { it.copy(note = event.note.take(200)) }
+                scheduleCategorizationDebounce()
             }
             is AddEditUiEvent.PhotoSelected -> _state.update {
                 it.copy(photoUri = event.uri)
@@ -249,6 +268,10 @@ class AddEditTransactionViewModel @Inject constructor(
                         }
                         transactionRepository.split(newId, children)
                     }
+                    // Anomaly detection for new expense transactions
+                    if (transaction.type == TransactionType.EXPENSE) {
+                        checkForAnomaly(transaction.copy(id = newId))
+                    }
                     _state.update { it.copy(isSaving = false, isDone = true) }
                 }
             } catch (e: Exception) {
@@ -265,6 +288,82 @@ class AddEditTransactionViewModel @Inject constructor(
                 _state.update { it.copy(showDeleteConfirm = false, isDone = true) }
             } catch (e: Exception) {
                 _state.update { it.copy(showDeleteConfirm = false, error = e.message) }
+            }
+        }
+    }
+
+    // ---- Feature A: Smart Auto-Categorization ----
+
+    private fun scheduleCategorizationDebounce() {
+        val note = _state.value.note
+        val amount = _state.value.resolvedAmount
+        // Only suggest when there's no manual category and enough note text
+        if (note.length < 3 || _state.value.categoryId != null) {
+            _state.update { it.copy(aiCategorySuggestion = null) }
+            return
+        }
+        val cacheKey = "$note|${amount.toLong()}"
+        if (cacheKey in categorizationCache) {
+            _state.update { it.copy(aiCategorySuggestion = categorizationCache[cacheKey]) }
+            return
+        }
+        categorizationJob?.cancel()
+        categorizationJob = viewModelScope.launch {
+            delay(600)
+            val cats = _state.value.filteredCategories
+            if (cats.isEmpty()) return@launch
+            aiRepository.categorizeTransaction(note, amount, cats)
+                .getOrNull()
+                ?.let { suggestedId ->
+                    categorizationCache[cacheKey] = suggestedId
+                    if (_state.value.categoryId == null) {
+                        _state.update { it.copy(aiCategorySuggestion = suggestedId) }
+                    }
+                }
+        }
+    }
+
+    // ---- Feature D: Anomaly Detection ----
+
+    private fun checkForAnomaly(savedTransaction: Transaction) {
+        viewModelScope.launch {
+            runCatching {
+                val ninetyDaysAgo = LocalDate.now().minusDays(90)
+                val pastTxns = transactionRepository
+                    .observeByDateRange(ninetyDaysAgo, LocalDate.now())
+                    .first()
+                    .filter {
+                        it.type == TransactionType.EXPENSE &&
+                            it.categoryId == savedTransaction.categoryId &&
+                            it.id != savedTransaction.id &&
+                            it.parentSplitId == null
+                    }
+
+                if (pastTxns.size < 3) return@runCatching
+
+                val amounts = pastTxns.map { it.amount }
+                val mean = amounts.average()
+                val variance = amounts.sumOf { (it - mean) * (it - mean) } / amounts.size
+                val stdDev = sqrt(variance)
+                if (stdDev == 0.0) return@runCatching
+
+                val zScore = (savedTransaction.amount - mean) / stdDev
+                val minThreshold = 10_000.0 // Only flag if amount is meaningful
+
+                if (zScore > 2.5 && savedTransaction.amount > minThreshold) {
+                    val cat = _state.value.categories.find { it.id == savedTransaction.categoryId }
+                    val catName = cat?.name ?: "this category"
+                    val insight = AiInsight(
+                        id = 0,
+                        type = InsightType.ANOMALY,
+                        title = "Unusual ${catName} spend",
+                        content = "This ${catName} transaction (${savedTransaction.amount.toLong()}) is ${String.format("%.1f", zScore)}x above your usual amount. Was there a special occasion?",
+                        periodKey = LocalDate.now().toString(),
+                        generatedAt = LocalDateTime.now(),
+                        dismissed = false,
+                    )
+                    aiRepository.saveInsights(listOf(insight))
+                }
             }
         }
     }

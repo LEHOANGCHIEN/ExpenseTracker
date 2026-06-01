@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.expensetracker.app.core.designsystem.component.AnimatedAmountText
 import com.expensetracker.app.core.designsystem.theme.ExpenseRed
 import com.expensetracker.app.core.designsystem.theme.IncomeGreen
 import com.expensetracker.app.core.util.CurrencyFormatter
@@ -56,8 +57,9 @@ fun BalanceCard(
                 color = Color.White.copy(alpha = 0.75f),
             )
             Spacer(Modifier.height(8.dp))
-            Text(
-                text = CurrencyFormatter.format(totalBalance, currency),
+            AnimatedAmountText(
+                amount = totalBalance,
+                currency = currency,
                 style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Bold),
                 color = Color.White,
             )

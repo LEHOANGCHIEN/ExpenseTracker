@@ -1,5 +1,9 @@
 package com.expensetracker.app.navigation
 
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.wrapContentSize
@@ -22,6 +26,9 @@ import com.expensetracker.app.feature.category.screen.CategoriesScreen
 import com.expensetracker.app.feature.home.screen.HomeScreen
 import com.expensetracker.app.feature.transaction.screen.AddEditTransactionScreen
 import com.expensetracker.app.feature.transaction.screen.TransactionDetailScreen
+import com.expensetracker.app.feature.ai_assistant.screen.AiAssistantScreen
+import com.expensetracker.app.feature.ocr_scan.screen.ReceiptScannerScreen
+import com.expensetracker.app.feature.onboarding.screen.OnboardingScreen
 import com.expensetracker.app.feature.settings.screen.GeminiTestScreen
 import com.expensetracker.app.feature.settings.screen.SettingsScreen
 import com.expensetracker.app.feature.statistics.screen.StatisticsScreen
@@ -37,6 +44,10 @@ fun AppNavHost(
         navController = navController,
         startDestination = startDestination,
         modifier = modifier,
+        enterTransition = { slideInHorizontally { it / 3 } + fadeIn() },
+        exitTransition = { slideOutHorizontally { -it / 3 } + fadeOut() },
+        popEnterTransition = { slideInHorizontally { -it / 3 } + fadeIn() },
+        popExitTransition = { slideOutHorizontally { it / 3 } + fadeOut() },
     ) {
         // ---- Bottom-nav screens ----
         composable<Home> {
@@ -62,7 +73,7 @@ fun AppNavHost(
             )
         }
         composable<AiAssistant> {
-            PlaceholderScreen("AI Assistant ✨")
+            AiAssistantScreen()
         }
 
         // ---- Transaction detail/edit ----
@@ -116,7 +127,17 @@ fun AppNavHost(
             )
         }
         composable<ReceiptScanner> {
-            PlaceholderScreen("Receipt Scanner")
+            ReceiptScannerScreen(
+                onNavigateToAddTransaction = { amount, note, categoryId ->
+                    navController.navigate(
+                        AddEditTransaction(
+                            prefillAmount = amount,
+                            prefillNote = note,
+                            prefillCategoryId = categoryId,
+                        ),
+                    )
+                },
+            )
         }
         composable<WalletManagement> {
             WalletListScreen(
@@ -143,7 +164,13 @@ fun AppNavHost(
             )
         }
         composable<Onboarding> {
-            PlaceholderScreen("Onboarding")
+            OnboardingScreen(
+                onFinish = {
+                    navController.navigate(Home) {
+                        popUpTo(Onboarding) { inclusive = true }
+                    }
+                },
+            )
         }
     }
 }

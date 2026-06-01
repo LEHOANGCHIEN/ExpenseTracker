@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
@@ -179,6 +180,27 @@ private fun StatisticsContent(
         if (state.topNotes.isNotEmpty()) {
             item {
                 TopNotesSection(notes = state.topNotes)
+            }
+        }
+
+        // Refresh Insights button (Feature C)
+        item {
+            Button(
+                onClick = { onEvent(StatisticsEvent.RefreshInsights) },
+                enabled = !state.isGeneratingInsights,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+            ) {
+                if (state.isGeneratingInsights) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                    )
+                    Spacer(Modifier.padding(start = 8.dp))
+                }
+                Text(if (state.isGeneratingInsights) "Generating insights…" else "Refresh insights ✨")
             }
         }
     }

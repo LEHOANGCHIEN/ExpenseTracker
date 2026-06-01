@@ -9,7 +9,12 @@ import kotlinx.serialization.Serializable
 @Serializable data object AiAssistant
 
 // ---- Transaction screens ----
-@Serializable data class AddEditTransaction(val id: Long? = null)
+@Serializable data class AddEditTransaction(
+    val id: Long? = null,
+    val prefillAmount: Double? = null,
+    val prefillNote: String? = null,
+    val prefillCategoryId: Long? = null,
+)
 @Serializable data class TransactionDetail(val id: Long)
 
 // ---- Feature screens ----

@@ -181,6 +181,18 @@ fun AddEditTransactionScreen(
                     onMoreClick = { viewModel.onEvent(AddEditUiEvent.ShowCategoryPicker) },
                 )
 
+                // AI category suggestion chip (Feature A)
+                if (state.aiCategorySuggestion != null && state.categoryId == null) {
+                    val suggestedCat = state.categories.find { it.id == state.aiCategorySuggestion }
+                    if (suggestedCat != null) {
+                        AssistChip(
+                            onClick = { viewModel.onEvent(AddEditUiEvent.CategorySelected(suggestedCat.id)) },
+                            label = { Text("✨ Suggested: ${suggestedCat.name}") },
+                            modifier = Modifier.padding(top = 4.dp),
+                        )
+                    }
+                }
+
                 // Wallet + Date row
                 WalletAndDateRow(state = state, onEvent = { viewModel.onEvent(it) })
 

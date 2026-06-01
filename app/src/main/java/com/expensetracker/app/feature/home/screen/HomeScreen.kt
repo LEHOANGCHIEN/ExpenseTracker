@@ -1,0 +1,368 @@
+package com.expensetracker.app.feature.home.screen
+
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.expensetracker.app.core.designsystem.component.EmptyState
+import com.expensetracker.app.core.designsystem.component.SectionHeader
+import com.expensetracker.app.core.designsystem.component.ShimmerBox
+import com.expensetracker.app.core.util.DateUtils
+import com.expensetracker.app.feature.home.screen.component.AiInsightCard
+import com.expensetracker.app.feature.home.screen.component.BalanceCard
+import com.expensetracker.app.feature.home.screen.component.BudgetProgressCard
+import com.expensetracker.app.feature.home.screen.component.MonthSummaryCard
+import com.expensetracker.app.feature.home.screen.component.RecentTransactionsList
+import com.expensetracker.app.feature.home.screen.component.TopCategoriesCard
+import com.expensetracker.app.feature.home.state.HomeEvent
+import com.expensetracker.app.feature.home.viewmodel.HomeViewModel
+import java.time.LocalTime
+import java.time.YearMonth
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HomeScreen(
+    onNavigateToTransactions: () -> Unit,
+    onNavigateToAddTransaction: () -> Unit,
+    onNavigateToTransactionDetail: (Long) -> Unit,
+    onNavigateToAiAssistant: () -> Unit,
+    onNavigateToReceiptScanner: () -> Unit,
+    onNavigateToRecurring: () -> Unit,
+    viewModel: HomeViewModel = hiltViewModel(),
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
+
+    if (uiState.isLoading) {
+        HomeLoadingShimmer()
+        return
+    }
+
+    val isEmpty = uiState.recentTransactions.isEmpty() &&
+        uiState.monthIncome == 0.0 &&
+        uiState.monthExpense == 0.0 &&
+        uiState.totalBalance == 0.0
+
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = { viewModel.onEvent(HomeEvent.RefreshInsights) },
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        LazyColumn(
+            contentPadding = PaddingValues(bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(0.dp),
+        ) {
+            item {
+                HomeHeader(
+                    selectedMonth = uiState.selectedMonth,
+                    onPrevMonth = {
+                        viewModel.onEvent(HomeEvent.ChangeMonth(uiState.selectedMonth.minusMonths(1)))
+                    },
+                    onNextMonth = {
+                        viewModel.onEvent(HomeEvent.ChangeMonth(uiState.selectedMonth.plusMonths(1)))
+                    },
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                )
+            }
+
+            if (isEmpty) {
+                item {
+                    EmptyState(
+                        title = "No transactions yet",
+                        message = "Add your first transaction to start tracking your finances",
+                        actionLabel = "Add Transaction",
+                        onAction = onNavigateToAddTransaction,
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                    )
+                }
+            } else {
+                item {
+                    AnimatedContent(
+                        targetState = uiState.selectedMonth,
+                        transitionSpec = {
+                            val direction = if (targetState > initialState) 1 else -1
+                            (slideInHorizontally { it * direction } + fadeIn()) togetherWith
+                                (slideOutHorizontally { -it * direction } + fadeOut())
+                        },
+                        label = "month_balance",
+                    ) { _ ->
+                        BalanceCard(
+                            totalBalance = uiState.totalBalance,
+                            monthIncome = uiState.monthIncome,
+                            monthExpense = uiState.monthExpense,
+                            currency = uiState.currency,
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                        )
+                    }
+                }
+
+                item { Spacer(Modifier.height(12.dp)) }
+
+                item {
+                    MonthSummaryCard(
+                        monthIncome = uiState.monthIncome,
+                        monthExpense = uiState.monthExpense,
+                        monthNet = uiState.monthNet,
+                        currency = uiState.currency,
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                    )
+                }
+
+                uiState.latestInsight?.let { insight ->
+                    item { Spacer(Modifier.height(12.dp)) }
+                    item {
+                        AnimatedVisibility(visible = true, enter = fadeIn(), exit = fadeOut()) {
+                            AiInsightCard(
+                                insight = insight,
+                                onTellMeMore = onNavigateToAiAssistant,
+                                onDismiss = {
+                                    viewModel.onEvent(HomeEvent.DismissInsight(insight.id))
+                                },
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                            )
+                        }
+                    }
+                }
+
+                if (uiState.activeBudgets.isNotEmpty()) {
+                    item { Spacer(Modifier.height(12.dp)) }
+                    item {
+                        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                            SectionHeader(title = "Active Budgets")
+                        }
+                    }
+                    item {
+                        LazyRow(
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        ) {
+                            items(uiState.activeBudgets) { budgetProgress ->
+                                BudgetProgressCard(
+                                    budgetProgress = budgetProgress,
+                                    currency = uiState.currency,
+                                )
+                            }
+                        }
+                    }
+                }
+
+                item { Spacer(Modifier.height(12.dp)) }
+
+                item {
+                    TopCategoriesCard(
+                        categories = uiState.topCategoriesThisMonth,
+                        currency = uiState.currency,
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                    )
+                }
+
+                item { Spacer(Modifier.height(12.dp)) }
+
+                item {
+                    SectionHeader(
+                        title = "Recent Transactions",
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        action = {
+                            TextButton(onClick = onNavigateToTransactions) {
+                                Text("See all")
+                            }
+                        },
+                    )
+                }
+
+                item {
+                    RecentTransactionsList(
+                        transactions = uiState.recentTransactions,
+                        categoriesById = uiState.categoriesById,
+                        currency = uiState.currency,
+                        onTransactionClick = onNavigateToTransactionDetail,
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                    )
+                }
+
+                item { Spacer(Modifier.height(12.dp)) }
+
+                item {
+                    QuickActionsRow(
+                        onScanReceipt = onNavigateToReceiptScanner,
+                        onAiChat = onNavigateToAiAssistant,
+                        onAddRecurring = onNavigateToRecurring,
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HomeHeader(
+    selectedMonth: YearMonth,
+    onPrevMonth: () -> Unit,
+    onNextMonth: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier) {
+        Text(
+            text = "${greeting()}, there 👋",
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Spacer(Modifier.height(12.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            IconButton(onClick = onPrevMonth) {
+                Icon(
+                    imageVector = Icons.Default.ChevronLeft,
+                    contentDescription = "Previous month",
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+            }
+            Text(
+                text = DateUtils.formatMonth(selectedMonth),
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Medium),
+                modifier = Modifier.width(140.dp),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            )
+            IconButton(onClick = onNextMonth) {
+                Icon(
+                    imageVector = Icons.Default.ChevronRight,
+                    contentDescription = "Next month",
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun QuickActionsRow(
+    onScanReceipt: () -> Unit,
+    onAiChat: () -> Unit,
+    onAddRecurring: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        QuickActionButton(
+            icon = Icons.AutoMirrored.Filled.ReceiptLong,
+            label = "Scan Receipt",
+            onClick = onScanReceipt,
+            modifier = Modifier.weight(1f),
+        )
+        QuickActionButton(
+            icon = Icons.Default.AutoAwesome,
+            label = "AI Chat",
+            onClick = onAiChat,
+            modifier = Modifier.weight(1f),
+        )
+        QuickActionButton(
+            icon = Icons.Default.Repeat,
+            label = "Recurring",
+            onClick = onAddRecurring,
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
+
+@Composable
+private fun QuickActionButton(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        onClick = onClick,
+        modifier = modifier,
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        tonalElevation = 1.dp,
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(22.dp),
+                tint = MaterialTheme.colorScheme.primary,
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@Composable
+private fun HomeLoadingShimmer() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        ShimmerBox(modifier = Modifier.fillMaxWidth().height(24.dp))
+        ShimmerBox(modifier = Modifier.fillMaxWidth().height(160.dp))
+        ShimmerBox(modifier = Modifier.fillMaxWidth().height(80.dp))
+        ShimmerBox(modifier = Modifier.fillMaxWidth().height(200.dp))
+        ShimmerBox(modifier = Modifier.fillMaxWidth().height(200.dp))
+    }
+}
+
+private fun greeting(): String = when (LocalTime.now().hour) {
+    in 0..11 -> "Good morning"
+    in 12..17 -> "Good afternoon"
+    else -> "Good evening"
+}

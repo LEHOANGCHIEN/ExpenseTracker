@@ -14,11 +14,16 @@ import kotlinx.serialization.Serializable
 
 // ---- Feature screens ----
 @Serializable data object Categories
+@Serializable data class AddEditCategory(val id: Long? = null)
 @Serializable data object Budgets
+@Serializable data class AddEditBudget(val id: Long? = null)
 @Serializable data object Recurring
+@Serializable data class AddEditRecurring(val id: Long? = null)
 @Serializable data object ReceiptScanner
 @Serializable data object WalletManagement
+@Serializable data class AddEditWallet(val id: Long? = null)
 
 // ---- App-level screens ----
 @Serializable data object Settings
 @Serializable data object Onboarding
+@Serializable data object GeminiTest

@@ -18,6 +18,7 @@ fun TransactionEntity.toDomain() = Transaction(
     recurringId = recurringId,
     parentSplitId = parentSplitId,
     tags = tags,
+    toWalletId = toWalletId,
 )
 
 fun Transaction.toEntity() = TransactionEntity(
@@ -35,4 +36,5 @@ fun Transaction.toEntity() = TransactionEntity(
     recurringId = recurringId,
     parentSplitId = parentSplitId,
     tags = tags,
+    toWalletId = toWalletId,
 )

@@ -59,4 +59,5 @@ data class TransactionEntity(
     val recurringId: Long?,
     val parentSplitId: Long?,
     val tags: List<String>,
+    val toWalletId: Long? = null,
 )

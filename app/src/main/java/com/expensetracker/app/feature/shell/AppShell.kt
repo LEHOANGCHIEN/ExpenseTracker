@@ -94,6 +94,7 @@ import com.expensetracker.app.navigation.TransactionDetail
 import com.expensetracker.app.navigation.TransactionList
 import com.expensetracker.app.navigation.WalletManagement
 import java.time.format.DateTimeFormatter
+import androidx.compose.foundation.layout.Column
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -446,9 +447,8 @@ private fun NaturalLanguageTab(
 
         // Example chips
         if (state.parsedResult == null) {
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 NL_EXAMPLES.forEach { example ->
                     AssistChip(

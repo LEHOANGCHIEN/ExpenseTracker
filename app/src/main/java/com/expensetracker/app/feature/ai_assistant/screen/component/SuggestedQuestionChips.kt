@@ -2,7 +2,7 @@ package com.expensetracker.app.feature.ai_assistant.screen.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Text
@@ -17,10 +17,9 @@ fun SuggestedQuestionChips(
     onQuestionSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    FlowRow(
+    Column(
         modifier = modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         questions.forEach { question ->
             AssistChip(

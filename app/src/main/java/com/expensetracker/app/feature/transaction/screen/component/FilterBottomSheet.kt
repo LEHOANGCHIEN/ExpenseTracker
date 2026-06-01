@@ -86,7 +86,9 @@ fun FilterBottomSheet(
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 TransactionType.entries.forEach { type ->
                     FilterChip(
                         selected = type in selectedTypes,
@@ -106,7 +108,9 @@ fun FilterBottomSheet(
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     categories.forEach { cat ->
                         FilterChip(
                             selected = cat.id in selectedCategoryIds,

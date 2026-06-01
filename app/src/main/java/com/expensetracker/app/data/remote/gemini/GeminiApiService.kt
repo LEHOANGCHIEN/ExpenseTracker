@@ -15,7 +15,7 @@ class GeminiApiService @Inject constructor() {
 
     private val chatModel: GenerativeModel by lazy {
         GenerativeModel(
-            modelName = "gemini-1.5-flash",
+            modelName = "gemini-2.5-flash",
             apiKey = apiKey,
             generationConfig = generationConfig {
                 temperature = 0.4f
@@ -28,7 +28,7 @@ class GeminiApiService @Inject constructor() {
 
     private val jsonModel: GenerativeModel by lazy {
         GenerativeModel(
-            modelName = "gemini-1.5-flash",
+            modelName = "gemini-2.5-flash",
             apiKey = apiKey,
             generationConfig = generationConfig {
                 temperature = 0.2f

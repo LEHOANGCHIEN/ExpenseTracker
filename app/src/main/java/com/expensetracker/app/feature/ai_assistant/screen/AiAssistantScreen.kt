@@ -35,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -121,7 +122,6 @@ fun AiAssistantScreen(
             Box(modifier = Modifier.weight(1f)) {
                 if (state.messages.isEmpty() && !state.isResponding) {
                     EmptyState(
-                        questions = state.suggestedQuestions,
                         onQuestionSelected = viewModel::onSendSuggestedQuestion,
                         modifier = Modifier.fillMaxSize(),
                     )
@@ -146,15 +146,6 @@ fun AiAssistantScreen(
                 }
             }
 
-            // Quick-reply chips when conversation is active
-            if (state.messages.isNotEmpty() && !state.isResponding) {
-                HorizontalDivider()
-                SuggestedQuestionChips(
-                    questions = state.suggestedQuestions,
-                    onQuestionSelected = viewModel::onSendSuggestedQuestion,
-                )
-            }
-
             HorizontalDivider()
             ChatInput(
                 value = state.inputText,
@@ -168,10 +159,10 @@ fun AiAssistantScreen(
 
 @Composable
 private fun EmptyState(
-    questions: List<String>,
     onQuestionSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val suggestions = stringArrayResource(R.array.ai_default_suggestions).toList()
     Column(
         modifier = modifier.padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -198,7 +189,7 @@ private fun EmptyState(
         )
         Spacer(Modifier.height(24.dp))
         SuggestedQuestionChips(
-            questions = questions,
+            questions = suggestions,
             onQuestionSelected = onQuestionSelected,
         )
     }

@@ -45,8 +45,6 @@ class AiAssistantViewModel @Inject constructor(
                 it.copy(
                     currentSessionId = sessionId,
                     messages = history,
-                    suggestedQuestions = if (history.isEmpty()) DEFAULT_SUGGESTED_QUESTIONS
-                        else FOLLOW_UP_QUESTIONS,
                 )
             }
         }
@@ -106,7 +104,6 @@ class AiAssistantViewModel @Inject constructor(
                         it.copy(
                             messages = it.messages + assistantMessage.copy(id = savedAssistantId),
                             isResponding = false,
-                            suggestedQuestions = FOLLOW_UP_QUESTIONS,
                         )
                     }
                 },
@@ -136,7 +133,6 @@ class AiAssistantViewModel @Inject constructor(
                 inputText = "",
                 isResponding = false,
                 error = null,
-                suggestedQuestions = DEFAULT_SUGGESTED_QUESTIONS,
             )
         }
     }
@@ -151,7 +147,6 @@ class AiAssistantViewModel @Inject constructor(
                 it.copy(
                     messages = emptyList(),
                     error = null,
-                    suggestedQuestions = DEFAULT_SUGGESTED_QUESTIONS,
                 )
             }
         }

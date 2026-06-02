@@ -200,6 +200,12 @@
     <string name="ai_empty_subtitle">Hỏi tôi bất cứ điều gì về tài chính.\nTôi dùng dữ liệu thực của bạn để tư vấn cá nhân hóa.</string>
     <string name="ai_clear_dialog_title">Xóa lịch sử?</string>
     <string name="ai_clear_dialog_message">Tất cả tin nhắn trong phiên này sẽ bị xóa.</string>
+    <string-array name="ai_default_suggestions">
+        <item>Làm thế nào để tiết kiệm nhiều hơn?</item>
+        <item>Tháng này tôi đã chi tiêu nhiều nhất ở đâu?</item>
+        <item>Gợi ý ngân sách thực phẩm hợp lý</item>
+        <item>Tôi có đang chi quá nhiều cho giải trí không?</item>
+    </string-array>
 
     <!-- OCR Scanner -->
     <string name="ocr_title">Quét hóa đơn</string>

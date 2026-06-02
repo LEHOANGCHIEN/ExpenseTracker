@@ -200,6 +200,12 @@
     <string name="ai_empty_subtitle">Ask me anything about your finances.\nI use your actual data to give you personalized advice.</string>
     <string name="ai_clear_dialog_title">Clear history?</string>
     <string name="ai_clear_dialog_message">All messages in this session will be deleted.</string>
+    <string-array name="ai_default_suggestions">
+        <item>How can I save more money?</item>
+        <item>Where did most of my money go this month?</item>
+        <item>Suggest a realistic food budget</item>
+        <item>Am I spending too much on entertainment?</item>
+    </string-array>
 
     <!-- OCR Scanner -->
     <string name="ocr_title">Scan Receipt</string>

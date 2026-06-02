@@ -24,7 +24,8 @@
       "Bash(mkdir -p \"/home/hoangchien/UIT/Semester 6/Mobile Development/FinalProject/ExpenseTracker/app/src/main/java/com/expensetracker/app/di\")",
       "Bash(mkdir -p \"/home/hoangchien/UIT/Semester 6/Mobile Development/FinalProject/ExpenseTracker/app/src/main/java/com/expensetracker/app/feature/ai_assistant/screen/component\")",
       "Bash(mkdir -p \"/home/hoangchien/UIT/Semester 6/Mobile Development/FinalProject/ExpenseTracker/app/src/main/java/com/expensetracker/app/feature/ocr_scan/screen\")",
-      "Bash(xargs cat -n)"
+      "Bash(xargs cat -n)",
+      "Bash(xargs cat)"
     ]
   }
 }

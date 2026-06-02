@@ -1,30 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Adaptive icon foreground — 108×108dp canvas.
+  Safe zone: 21dp–87dp on both axes (66×66dp inner area).
+
+  Design: billfold wallet with a credit card peeking from the top and a
+  coin-pocket circle bump on the right side.  All elements are white on a
+  transparent background so they composite cleanly over any background
+  colour (teal solid in ic_launcher_background.xml).
+
+  Drawing order (back to front):
+    1. Card  — white 80 % opacity, rounded rect above the wallet body
+    2. Coin  — white solid circle whose left half will be covered by the wallet,
+               leaving a D-shaped coin-pocket bump visible on the right
+    3. Wallet body — white solid rounded rect, covers coin's left half
+-->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <path android:pathData="M31,63.928c0,0 6.4,-11 12.1,-13.1c7.2,-2.6 26,-1.4 26,-1.4l38.1,38.1L107,108.928l-32,-1L31,63.928z">
-        <aapt:attr name="android:fillColor">
-            <gradient
-                android:endX="85.84757"
-                android:endY="92.4963"
-                android:startX="42.9492"
-                android:startY="49.59793"
-                android:type="linear">
-                <item
-                    android:color="#44000000"
-                    android:offset="0.0" />
-                <item
-                    android:color="#00000000"
-                    android:offset="1.0" />
-            </gradient>
-        </aapt:attr>
-    </path>
+
+    <!--
+      Card (behind wallet, peeking above the wallet top edge at y=40).
+      Rounded rect: left=35 top=30 right=61 bottom=46  rx=4
+      Visible area above wallet: y=30–40 (10 units).
+      Safe zone check: x 35–61 ✓  y 30–46 ✓
+    -->
     <path
         android:fillColor="#FFFFFF"
-        android:fillType="nonZero"
-        android:pathData="M65.3,45.828l3.8,-6.6c0.2,-0.4 0.1,-0.9 -0.3,-1.1c-0.4,-0.2 -0.9,-0.1 -1.1,0.3l-3.9,6.7c-6.3,-2.8 -13.4,-2.8 -19.7,0l-3.9,-6.7c-0.2,-0.4 -0.7,-0.5 -1.1,-0.3C38.8,38.328 38.7,38.828 38.9,39.228l3.8,6.6C36.2,49.428 31.7,56.028 31,63.928h46C76.3,56.028 71.8,49.428 65.3,45.828zM43.4,57.328c-0.8,0 -1.5,-0.5 -1.8,-1.2c-0.3,-0.7 -0.1,-1.5 0.4,-2.1c0.5,-0.5 1.4,-0.7 2.1,-0.4c0.7,0.3 1.2,1 1.2,1.8C45.3,56.528 44.5,57.328 43.4,57.328L43.4,57.328zM64.6,57.328c-0.8,0 -1.5,-0.5 -1.8,-1.2s-0.1,-1.5 0.4,-2.1c0.5,-0.5 1.4,-0.7 2.1,-0.4c0.7,0.3 1.2,1 1.2,1.8C66.5,56.528 65.6,57.328 64.6,57.328L64.6,57.328z"
-        android:strokeWidth="1"
-        android:strokeColor="#00000000" />
+        android:fillAlpha="0.80"
+        android:pathData="M39,30 H57 A4,4,0,0,1,61,34 V42 A4,4,0,0,1,57,46 H39 A4,4,0,0,1,35,42 V34 A4,4,0,0,1,39,30 Z" />
+
+    <!--
+      Coin pocket — solid white circle, center=(76,58) radius=11.
+      Drawn before the wallet so the wallet covers the left half (x 65–76).
+      Only the right D-shaped half (x 76–87) is visible against the teal background,
+      forming a recognisable coin-pocket bump.
+      Safe zone check: right extent 76+11=87 ✓  top/bottom 58±11=47/69 ✓
+    -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M87,58 A11,11,0,1,0,65,58 A11,11,0,1,0,87,58 Z" />
+
+    <!--
+      Wallet body — main billfold shape.
+      Rounded rect: left=24 top=40 right=76 bottom=76  rx=7
+      Covers the coin circle from x=24–76, leaving the right bump visible.
+      Safe zone check: x 24–76 ✓  y 40–76 ✓
+    -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M31,40 H69 A7,7,0,0,1,76,47 V69 A7,7,0,0,1,69,76 H31 A7,7,0,0,1,24,69 V47 A7,7,0,0,1,31,40 Z" />
+
 </vector>

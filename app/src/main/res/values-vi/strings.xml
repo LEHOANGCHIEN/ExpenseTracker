@@ -16,6 +16,34 @@
     <string name="action_see_all">Xem tất cả</string>
     <string name="action_use_this">Sử dụng</string>
     <string name="action_scan_again">Quét lại</string>
+    <string name="action_edit">Sửa</string>
+    <string name="action_update">Cập nhật</string>
+    <string name="action_add">Thêm</string>
+    <string name="action_archive">Lưu trữ</string>
+    <string name="action_ok">OK</string>
+    <string name="action_clear">Xóa</string>
+    <string name="action_resume">Tiếp tục</string>
+    <string name="action_pause">Tạm dừng</string>
+
+    <!-- Greetings -->
+    <string name="greeting_morning">Chào buổi sáng 👋</string>
+    <string name="greeting_afternoon">Chào buổi chiều 👋</string>
+    <string name="greeting_evening">Chào buổi tối 👋</string>
+
+    <!-- Navigation labels -->
+    <string name="nav_home">Trang chủ</string>
+    <string name="nav_transactions">Giao dịch</string>
+    <string name="nav_stats">Thống kê</string>
+    <string name="nav_ai">AI</string>
+    <string name="nav_wallets">Ví</string>
+    <string name="nav_categories">Danh mục</string>
+    <string name="nav_budgets">Ngân sách</string>
+    <string name="nav_recurring">Định kỳ</string>
+    <string name="nav_transaction_detail">Giao dịch</string>
+    <string name="nav_statistics">Thống kê</string>
+    <string name="nav_settings">Cài đặt</string>
+    <string name="nav_add_transaction">Thêm giao dịch</string>
+    <string name="nav_get_started">Bắt đầu</string>
 
     <!-- Home -->
     <string name="home_total_balance">Tổng số dư</string>
@@ -25,6 +53,33 @@
     <string name="home_empty_title">Chưa có giao dịch</string>
     <string name="home_empty_message">Thêm giao dịch đầu tiên để bắt đầu</string>
     <string name="home_add_transaction">Thêm giao dịch</string>
+    <string name="home_active_budgets">Ngân sách đang hoạt động</string>
+    <string name="home_quick_scan_receipt">Quét hóa đơn</string>
+    <string name="home_quick_ai_chat">AI Chat</string>
+    <string name="home_quick_recurring">Định kỳ</string>
+    <string name="home_prev_month">Tháng trước</string>
+    <string name="home_next_month">Tháng sau</string>
+
+    <!-- Quick Add -->
+    <string name="quick_add_title">Thêm nhanh</string>
+    <string name="quick_add_manual">Thủ công</string>
+    <string name="quick_add_ai_parse">✨ AI Phân tích</string>
+    <string name="quick_add_amount">Số tiền</string>
+    <string name="quick_add_note">Ghi chú</string>
+    <string name="quick_add_open_full">Mở biểu mẫu đầy đủ</string>
+    <string name="quick_add_nl_hint">Mô tả chi tiêu — ví dụ \'50k cà phê sáng nay\'</string>
+    <string name="quick_add_voice_prompt">Mô tả giao dịch của bạn</string>
+    <string name="quick_add_voice_input">Nhập bằng giọng nói</string>
+    <string name="quick_add_parse_ai">Phân tích bằng AI ✨</string>
+    <string name="quick_add_parsed_result">Kết quả phân tích</string>
+    <string name="quick_add_amount_result">Số tiền: %s</string>
+    <string name="quick_add_type_result">Loại: %s</string>
+    <string name="quick_add_date_result">Ngày: %s</string>
+    <string name="quick_add_note_result">Ghi chú: %s</string>
+    <string name="quick_add_category_result">Danh mục: %s</string>
+    <string name="quick_add_example_1">Mua đồ ăn 200k</string>
+    <string name="quick_add_example_2">Lương 15 triệu hôm nay</string>
+    <string name="quick_add_example_3">Cà phê với bạn bè 80k hôm qua</string>
 
     <!-- Transactions -->
     <string name="transaction_empty_title">Không có giao dịch</string>
@@ -32,26 +87,107 @@
     <string name="transaction_deleted">Đã xóa giao dịch</string>
     <string name="transaction_undo">Hoàn tác</string>
     <string name="transaction_note_hint">Giao dịch này là gì?</string>
+    <string name="transaction_not_found">Không tìm thấy giao dịch</string>
+    <string name="transaction_search_hint">Tìm giao dịch…</string>
+    <string name="transaction_selected_count">%d đã chọn</string>
+    <string name="transaction_clear_selection">Bỏ chọn tất cả</string>
+    <string name="transaction_delete_selected">Xóa đã chọn</string>
+    <string name="transaction_add_title">Thêm giao dịch</string>
+    <string name="transaction_edit_title">Sửa giao dịch</string>
+    <string name="transaction_detail_category">Danh mục</string>
+    <string name="transaction_detail_unknown">Không xác định</string>
+    <string name="transaction_detail_wallet">Ví</string>
+    <string name="transaction_detail_date">Ngày</string>
+    <string name="transaction_detail_note">Ghi chú</string>
+    <string name="transaction_detail_tags">Thẻ</string>
+    <string name="transaction_detail_recurring">Thuộc giao dịch định kỳ</string>
+    <string name="transaction_detail_split">Chia (%d phần)</string>
+    <string name="transaction_detail_receipt_photo">Ảnh hóa đơn</string>
+    <string name="transaction_detail_created">Tạo lúc %s</string>
+    <string name="transaction_delete_title">Xóa giao dịch</string>
+    <string name="transaction_delete_message">Hành động này không thể hoàn tác.</string>
+    <string name="transaction_delete_confirm">Bạn có chắc muốn xóa giao dịch này?</string>
+    <string name="transaction_note_label">Ghi chú</string>
+    <string name="transaction_add_tag">Thêm thẻ</string>
+    <string name="transaction_tag_remove">Xóa thẻ</string>
+    <string name="transaction_attach_photo">Đính kèm ảnh</string>
+    <string name="transaction_photo_remove">Xóa ảnh</string>
+    <string name="transaction_photo_label">Ảnh giao dịch</string>
+    <string name="transaction_recurring_notice">ℹ️ Đây là giao dịch trong lịch định kỳ. Chỉnh sửa chỉ ảnh hưởng lần này.</string>
+    <string name="transaction_advanced_options">Tùy chọn nâng cao</string>
+    <string name="transaction_split_action">Chia giao dịch</string>
+    <string name="transaction_split_parts">Chia thành %d phần</string>
+    <string name="transaction_more_categories">Thêm</string>
+    <string name="transaction_ai_suggested">✨ Gợi ý: %s</string>
+    <string name="transaction_wallet_label">Ví</string>
+    <string name="transaction_to_wallet">Đến: %s</string>
+    <string name="transaction_filter">Lọc</string>
+    <string name="transaction_search">Tìm kiếm</string>
 
     <!-- Categories -->
     <string name="category_empty_title">Không có danh mục</string>
     <string name="category_empty_message">Tạo danh mục tùy chỉnh đầu tiên</string>
+    <string name="category_label">Danh mục</string>
+    <string name="category_overall">Tổng thể (tất cả chi tiêu)</string>
+    <string name="category_add">Thêm danh mục</string>
+    <string name="category_cannot_delete_title">Không thể xóa</string>
+    <string name="category_cannot_delete_message">"%s" có giao dịch liên quan. Lưu trữ để ẩn khỏi giao dịch mới?</string>
+    <string name="category_expense_tab">Chi tiêu</string>
+    <string name="category_income_tab">Thu nhập</string>
+    <string name="category_empty_expense_hint">Chưa có danh mục chi tiêu</string>
+    <string name="category_empty_income_hint">Chưa có danh mục thu nhập</string>
 
     <!-- Budgets -->
     <string name="budget_empty_title">Không có ngân sách</string>
     <string name="budget_empty_message">Đặt ngân sách để theo dõi giới hạn chi tiêu</string>
+    <string name="budget_empty_title_alt">Chưa có ngân sách</string>
+    <string name="budget_empty_message_alt">Đặt giới hạn chi tiêu để theo dõi tài chính</string>
+    <string name="budget_create">Tạo ngân sách</string>
+    <string name="budget_add">Thêm ngân sách</string>
+    <string name="budget_new_title">Ngân sách mới</string>
+    <string name="budget_edit_title">Sửa ngân sách</string>
+    <string name="budget_amount">Số tiền ngân sách</string>
+    <string name="budget_period_label">Kỳ</string>
+    <string name="budget_alert_threshold">Ngưỡng cảnh báo</string>
+    <string name="budget_alert_hint">Thông báo khi chi tiêu đạt %%</string>
+    <string name="budget_save">Lưu ngân sách</string>
+    <string name="budget_custom_start">Bắt đầu: %s</string>
+    <string name="budget_custom_end">Kết thúc: %s</string>
+    <string name="budget_custom_end_select">Kết thúc: Chọn</string>
 
     <!-- Wallets -->
     <string name="wallet_empty_title">Không có ví</string>
     <string name="wallet_empty_message">Thêm ví để bắt đầu theo dõi tài chính</string>
+    <string name="wallet_add">Thêm ví</string>
+    <string name="wallet_empty_title_alt">Chưa có ví</string>
+    <string name="wallet_empty_message_alt">Thêm ví để bắt đầu theo dõi tiền của bạn</string>
+    <string name="wallet_total_balance">Tổng số dư</string>
 
     <!-- Recurring -->
     <string name="recurring_empty_title">Không có giao dịch định kỳ</string>
     <string name="recurring_empty_message">Thiết lập giao dịch định kỳ để tự động hóa chi phí thường xuyên</string>
+    <string name="recurring_add">Thêm định kỳ</string>
+    <string name="recurring_add_schedule">Thêm lịch</string>
+    <string name="recurring_empty_message_alt">Thiết lập giao dịch lặp lại tự động</string>
+    <string name="recurring_next">Tiếp theo: %s</string>
+    <string name="recurring_schedule_unknown">Lịch</string>
 
     <!-- Statistics -->
     <string name="statistics_refresh_insights">Làm mới thống kê ✨</string>
     <string name="statistics_generating_insights">Đang tạo thống kê…</string>
+    <string name="statistics_summary">Tổng quan</string>
+    <string name="statistics_income">Thu nhập</string>
+    <string name="statistics_expense">Chi tiêu</string>
+    <string name="statistics_net">Số dư</string>
+    <string name="statistics_spending_trend">Xu hướng chi tiêu</string>
+    <string name="statistics_income_vs_expense">Thu nhập và Chi tiêu</string>
+    <string name="statistics_by_category">Theo danh mục</string>
+    <string name="statistics_daily_heatmap">Bản đồ nhiệt chi tiêu hằng ngày</string>
+    <string name="statistics_frequent_notes">Ghi chú thường gặp</string>
+    <string name="statistics_no_expense_data">Không có dữ liệu chi tiêu</string>
+    <string name="statistics_from">Từ: %s</string>
+    <string name="statistics_to">Đến: %s</string>
+    <string name="statistics_times">%d lần</string>
 
     <!-- AI Assistant -->
     <string name="ai_title">Trợ lý AI ✨</string>
@@ -60,6 +196,10 @@
     <string name="ai_clear_history">Xóa lịch sử</string>
     <string name="ai_input_hint">Hỏi về tài chính của bạn…</string>
     <string name="copied_to_clipboard">Đã sao chép</string>
+    <string name="ai_financial_assistant">Trợ lý tài chính AI</string>
+    <string name="ai_empty_subtitle">Hỏi tôi bất cứ điều gì về tài chính.\nTôi dùng dữ liệu thực của bạn để tư vấn cá nhân hóa.</string>
+    <string name="ai_clear_dialog_title">Xóa lịch sử?</string>
+    <string name="ai_clear_dialog_message">Tất cả tin nhắn trong phiên này sẽ bị xóa.</string>
 
     <!-- OCR Scanner -->
     <string name="ocr_title">Quét hóa đơn</string>
@@ -71,12 +211,59 @@
     <string name="settings_clear_data_message">Thao tác này sẽ xóa vĩnh viễn tất cả giao dịch, ví, danh mục và ngân sách. Không thể hoàn tác.</string>
     <string name="settings_export_success">Xuất dữ liệu thành công</string>
     <string name="settings_import_success">Nhập dữ liệu thành công</string>
+    <string name="settings_section_language">Ngôn ngữ</string>
+    <string name="settings_language_english">English</string>
+    <string name="settings_language_vietnamese">Tiếng Việt</string>
+    <string name="settings_section_preferences">Tùy chọn</string>
+    <string name="settings_section_appearance">Giao diện</string>
+    <string name="settings_section_ai">Tính năng AI</string>
+    <string name="settings_section_notifications">Thông báo</string>
+    <string name="settings_section_data">Dữ liệu</string>
+    <string name="settings_section_about">Giới thiệu</string>
+    <string name="settings_currency">Đơn vị tiền tệ</string>
+    <string name="settings_month_starts_on">Ngày bắt đầu tháng</string>
+    <string name="settings_day_number">Ngày %d</string>
+    <string name="settings_theme">Giao diện</string>
+    <string name="settings_dynamic_colors">Màu động</string>
+    <string name="settings_dynamic_colors_subtitle">Sử dụng màu hình nền (Android 12+)</string>
+    <string name="settings_ai_enabled">Bật tính năng AI</string>
+    <string name="settings_ai_enabled_subtitle">Yêu cầu khóa API Gemini</string>
+    <string name="settings_gemini_api_key">Khóa API Gemini tùy chỉnh</string>
+    <string name="settings_gemini_api_key_placeholder">Ghi đè khóa cấu hình</string>
+    <string name="settings_gemini_api_key_hint">Để trống để dùng khóa mặc định</string>
+    <string name="settings_test_gemini">Kiểm tra Gemini ✨</string>
+    <string name="settings_save_key">Lưu khóa</string>
+    <string name="settings_daily_reminder">Nhắc nhở hằng ngày</string>
+    <string name="settings_daily_reminder_subtitle">Nhắc tôi ghi chi tiêu lúc 8 tối</string>
+    <string name="settings_budget_alerts">Cảnh báo ngân sách</string>
+    <string name="settings_budget_alerts_subtitle">Thông báo khi gần đến giới hạn ngân sách</string>
+    <string name="settings_export_json">Xuất ra JSON</string>
+    <string name="settings_import_json">Nhập từ JSON</string>
+    <string name="settings_exporting">Đang xuất…</string>
+    <string name="settings_importing">Đang nhập…</string>
+    <string name="settings_clear_data">Xóa tất cả dữ liệu</string>
+    <string name="settings_delete_everything">Xóa tất cả</string>
+    <string name="settings_import_title">Nhập dữ liệu?</string>
+    <string name="settings_import_message">Thao tác này sẽ thêm ví và danh mục từ file nhập. Dữ liệu hiện có được giữ nguyên.</string>
+    <string name="settings_import_confirm">Nhập</string>
+    <string name="settings_app_version">Phiên bản ứng dụng</string>
+    <string name="settings_build">Bản dựng</string>
+    <string name="settings_package">Gói ứng dụng</string>
 
     <!-- Onboarding -->
     <string name="onboarding_welcome_title">Quản Lý Chi Tiêu</string>
+    <string name="onboarding_welcome_subtitle">Kiểm soát tài chính của bạn.\nTheo dõi, phân tích và cải thiện — với AI bên cạnh.</string>
     <string name="onboarding_track_title">Theo dõi trong vài giây</string>
+    <string name="onboarding_track_subtitle">Thêm giao dịch ngay lập tức với thêm nhanh hoặc ngôn ngữ tự nhiên.\n\"Cà phê 50k sáng nay\" — xong.</string>
     <string name="onboarding_ai_title">Thống kê thông minh AI</string>
+    <string name="onboarding_ai_subtitle">Cố vấn tài chính cá nhân của bạn hiểu chi tiêu của bạn.\nNhận lời khuyên hữu ích dựa trên dữ liệu thực tế.</string>
     <string name="onboarding_setup_title">Thiết lập nhanh</string>
+    <string name="onboarding_setup_subtitle">Có thể thay đổi bất cứ lúc nào trong Cài đặt</string>
+    <string name="onboarding_daily_reminder">Nhắc nhở hằng ngày</string>
+    <string name="onboarding_daily_reminder_subtitle">Nhắc nhở ghi chi tiêu hằng ngày</string>
+    <string name="onboarding_currency">Đơn vị tiền tệ</string>
+    <string name="onboarding_month_starts_on">Ngày bắt đầu tháng</string>
+    <string name="onboarding_day_number">Ngày %d</string>
 
     <!-- Notifications -->
     <string name="notification_channel_budget">Cảnh báo ngân sách</string>

@@ -25,4 +25,5 @@ class PreferencesRepositoryImpl @Inject constructor(
     override suspend fun setMonthStartDay(day: Int) { dataStore.setMonthStartDay(day) }
     override suspend fun setDailyReminderEnabled(enabled: Boolean) { dataStore.setDailyReminderEnabled(enabled) }
     override suspend fun setBudgetAlertsEnabled(enabled: Boolean) { dataStore.setBudgetAlertsEnabled(enabled) }
+    override suspend fun setLanguage(language: String) { dataStore.setLanguage(language) }
 }

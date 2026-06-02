@@ -46,11 +46,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import com.expensetracker.app.R
 import com.expensetracker.app.core.designsystem.component.ShimmerBox
 import com.expensetracker.app.core.designsystem.theme.ExpenseRed
 import com.expensetracker.app.core.designsystem.theme.IncomeGreen
@@ -78,19 +80,19 @@ fun TransactionDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Transaction") },
+                title = { Text(stringResource(R.string.nav_transaction_detail)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back))
                     }
                 },
                 actions = {
                     state.transaction?.let { txn ->
                         IconButton(onClick = { onNavigateToEdit(txn.id) }) {
-                            Icon(Icons.Default.Edit, "Edit")
+                            Icon(Icons.Default.Edit, stringResource(R.string.action_edit))
                         }
                         IconButton(onClick = { viewModel.requestDelete() }) {
-                            Icon(Icons.Default.Delete, "Delete", tint = MaterialTheme.colorScheme.error)
+                            Icon(Icons.Default.Delete, stringResource(R.string.action_delete), tint = MaterialTheme.colorScheme.error)
                         }
                     }
                 },
@@ -101,7 +103,7 @@ fun TransactionDetailScreen(
             state.isLoading -> DetailShimmer(Modifier.padding(padding))
             state.transaction == null -> {
                 Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                    Text("Transaction not found")
+                    Text(stringResource(R.string.transaction_not_found))
                 }
             }
             else -> {
@@ -127,17 +129,17 @@ fun TransactionDetailScreen(
                         // Category row
                         DetailRow(
                             icon = Icons.Default.Category,
-                            label = "Category",
+                            label = stringResource(R.string.transaction_detail_category),
                             value = state.category?.let {
                                 if (it.icon.isNotBlank()) "${it.icon} ${it.name}" else it.name
-                            } ?: "Unknown",
+                            } ?: stringResource(R.string.transaction_detail_unknown),
                         )
 
                         // Wallet row
                         state.wallet?.let { wallet ->
                             DetailRow(
                                 icon = Icons.Default.AccountBalanceWallet,
-                                label = "Wallet",
+                                label = stringResource(R.string.transaction_detail_wallet),
                                 value = wallet.name,
                             )
                         }
@@ -145,7 +147,7 @@ fun TransactionDetailScreen(
                         // Date row
                         DetailRow(
                             icon = Icons.Default.CalendarToday,
-                            label = "Date",
+                            label = stringResource(R.string.transaction_detail_date),
                             value = txn.date.format(
                                 DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy", Locale.getDefault())
                             ),
@@ -153,7 +155,7 @@ fun TransactionDetailScreen(
 
                         // Note row
                         if (txn.note.isNotBlank()) {
-                            DetailSection(label = "Note") {
+                            DetailSection(label = stringResource(R.string.transaction_detail_note)) {
                                 Text(
                                     text = txn.note,
                                     style = MaterialTheme.typography.bodyMedium,
@@ -164,14 +166,20 @@ fun TransactionDetailScreen(
 
                         // Tags
                         if (txn.tags.isNotEmpty()) {
-                            DetailSection(label = "Tags") {
-                                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            DetailSection(label = stringResource(R.string.transaction_detail_tags)) {
+                                Column(
+                                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
                                     txn.tags.forEach { tag ->
                                         AssistChip(
                                             onClick = {},
                                             label = { Text(tag) },
                                             leadingIcon = {
-                                                Icon(Icons.Default.Tag, null, Modifier.size(14.dp))
+                                                Icon(
+                                                    Icons.Default.Tag,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(14.dp)
+                                                )
                                             },
                                         )
                                     }
@@ -198,7 +206,7 @@ fun TransactionDetailScreen(
                                     tint = MaterialTheme.colorScheme.secondary,
                                 )
                                 Text(
-                                    text = "Part of a recurring transaction",
+                                    text = stringResource(R.string.transaction_detail_recurring),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSecondaryContainer,
                                 )
@@ -209,14 +217,14 @@ fun TransactionDetailScreen(
                         if (state.splitChildren.isNotEmpty()) {
                             HorizontalDivider()
                             Text(
-                                text = "Split (${state.splitChildren.size} parts)",
+                                text = stringResource(R.string.transaction_detail_split, state.splitChildren.size),
                                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                             )
                             state.splitChildren.forEach { child ->
                                 SplitChildRow(
                                     child = child,
                                     categoryIcon = state.childCategories[child.categoryId]?.icon ?: "💸",
-                                    categoryName = state.childCategories[child.categoryId]?.name ?: "Unknown",
+                                    categoryName = state.childCategories[child.categoryId]?.name ?: stringResource(R.string.transaction_detail_unknown),
                                     currency = state.currency,
                                 )
                             }
@@ -227,7 +235,7 @@ fun TransactionDetailScreen(
                             HorizontalDivider()
                             AsyncImage(
                                 model = txn.photoUri,
-                                contentDescription = "Receipt photo",
+                                contentDescription = stringResource(R.string.transaction_detail_receipt_photo),
                                 contentScale = ContentScale.FillWidth,
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -238,7 +246,10 @@ fun TransactionDetailScreen(
                         // Metadata
                         HorizontalDivider()
                         Text(
-                            text = "Created ${txn.createdAt.format(DateTimeFormatter.ofPattern("MMM d, yyyy HH:mm"))}",
+                            text = stringResource(
+                                R.string.transaction_detail_created,
+                                txn.createdAt.format(DateTimeFormatter.ofPattern("MMM d, yyyy HH:mm"))
+                            ),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -251,15 +262,15 @@ fun TransactionDetailScreen(
     if (state.showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissDelete() },
-            title = { Text("Delete Transaction") },
-            text = { Text("This action cannot be undone.") },
+            title = { Text(stringResource(R.string.transaction_delete_title)) },
+            text = { Text(stringResource(R.string.transaction_delete_message)) },
             confirmButton = {
                 TextButton(onClick = { viewModel.confirmDelete() }) {
-                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { viewModel.dismissDelete() }) { Text("Cancel") }
+                TextButton(onClick = { viewModel.dismissDelete() }) { Text(stringResource(R.string.action_cancel)) }
             },
         )
     }

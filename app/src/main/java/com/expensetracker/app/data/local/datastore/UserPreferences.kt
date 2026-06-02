@@ -13,4 +13,5 @@ data class UserPreferences(
     val monthStartDay: Int = 1,
     val dailyReminderEnabled: Boolean = true,
     val budgetAlertsEnabled: Boolean = true,
+    val language: String = "en",
 )

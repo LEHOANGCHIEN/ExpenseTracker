@@ -20,9 +20,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.expensetracker.app.R
 import com.expensetracker.app.core.designsystem.component.EmptyState
 import com.expensetracker.app.core.designsystem.component.ShimmerBox
 import com.expensetracker.app.feature.budget.BudgetsEvent
@@ -42,10 +44,10 @@ fun BudgetsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Budgets") },
+                title = { Text(stringResource(R.string.nav_budgets)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back))
                     }
                 },
             )
@@ -55,16 +57,16 @@ fun BudgetsScreen(
                 onClick = onNavigateToAddBudget,
                 containerColor = MaterialTheme.colorScheme.primary,
             ) {
-                Icon(Icons.Default.Add, "Add Budget")
+                Icon(Icons.Default.Add, stringResource(R.string.budget_add))
             }
         },
     ) { padding ->
         when {
             state.isLoading -> BudgetsShimmer(Modifier.padding(padding))
             state.budgets.isEmpty() -> EmptyState(
-                title = "No budgets yet",
-                message = "Set a spending limit to track your finances",
-                actionLabel = "Create Budget",
+                title = stringResource(R.string.budget_empty_title_alt),
+                message = stringResource(R.string.budget_empty_message_alt),
+                actionLabel = stringResource(R.string.budget_create),
                 onAction = onNavigateToAddBudget,
                 modifier = Modifier
                     .fillMaxSize()

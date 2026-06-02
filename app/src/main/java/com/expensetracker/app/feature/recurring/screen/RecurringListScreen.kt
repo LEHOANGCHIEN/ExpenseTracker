@@ -45,12 +45,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.expensetracker.app.R
 import com.expensetracker.app.core.designsystem.component.EmptyState
 import com.expensetracker.app.core.designsystem.component.ShimmerBox
 import com.expensetracker.app.core.designsystem.theme.ExpenseRed
@@ -75,10 +77,10 @@ fun RecurringListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Recurring") },
+                title = { Text(stringResource(R.string.nav_recurring)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back))
                     }
                 },
             )
@@ -88,16 +90,16 @@ fun RecurringListScreen(
                 onClick = onNavigateToAdd,
                 containerColor = MaterialTheme.colorScheme.primary,
             ) {
-                Icon(Icons.Default.Add, "Add Recurring")
+                Icon(Icons.Default.Add, stringResource(R.string.recurring_add))
             }
         },
     ) { padding ->
         when {
             state.isLoading -> RecurringShimmer(Modifier.padding(padding))
             state.schedules.isEmpty() -> EmptyState(
-                title = "No recurring transactions",
-                message = "Set up automatic repeating transactions",
-                actionLabel = "Add Schedule",
+                title = stringResource(R.string.recurring_empty_title),
+                message = stringResource(R.string.recurring_empty_message_alt),
+                actionLabel = stringResource(R.string.recurring_add_schedule),
                 onAction = onNavigateToAdd,
                 modifier = Modifier.fillMaxSize().padding(padding),
             )
@@ -187,7 +189,7 @@ private fun RecurringScheduleCard(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = item.category?.name ?: "Unknown",
+                    text = item.category?.name ?: stringResource(R.string.transaction_detail_unknown),
                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                     color = if (item.schedule.isActive) MaterialTheme.colorScheme.onSurface
                         else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -198,7 +200,7 @@ private fun RecurringScheduleCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    text = "Next: ${DateUtils.formatRelative(item.schedule.nextOccurrence)}",
+                    text = stringResource(R.string.recurring_next, DateUtils.formatRelative(item.schedule.nextOccurrence)),
                     style = MaterialTheme.typography.labelSmall,
                     color = if (item.schedule.isActive) MaterialTheme.colorScheme.primary
                         else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -236,7 +238,7 @@ private fun RecurringActionSheet(
             modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
         ) {
             Text(
-                text = "${item.category?.icon ?: "🔄"} ${item.category?.name ?: "Schedule"}",
+                text = "${item.category?.icon ?: "🔄"} ${item.category?.name ?: stringResource(R.string.recurring_schedule_unknown)}",
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             )
@@ -247,7 +249,7 @@ private fun RecurringActionSheet(
             ) {
                 Icon(Icons.Default.Edit, null, Modifier.size(20.dp))
                 Spacer(Modifier.width(12.dp))
-                Text("Edit", modifier = Modifier.weight(1f), textAlign = TextAlign.Start)
+                Text(stringResource(R.string.action_edit), modifier = Modifier.weight(1f), textAlign = TextAlign.Start)
             }
             TextButton(
                 onClick = onTogglePause,
@@ -260,7 +262,7 @@ private fun RecurringActionSheet(
                 )
                 Spacer(Modifier.width(12.dp))
                 Text(
-                    if (item.schedule.isActive) "Pause" else "Resume",
+                    if (item.schedule.isActive) stringResource(R.string.action_pause) else stringResource(R.string.action_resume),
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Start,
                 )
@@ -271,7 +273,7 @@ private fun RecurringActionSheet(
             ) {
                 Icon(Icons.Default.Delete, null, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.error)
                 Spacer(Modifier.width(12.dp))
-                Text("Delete", modifier = Modifier.weight(1f), textAlign = TextAlign.Start, color = MaterialTheme.colorScheme.error)
+                Text(stringResource(R.string.action_delete), modifier = Modifier.weight(1f), textAlign = TextAlign.Start, color = MaterialTheme.colorScheme.error)
             }
         }
     }

@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.expensetracker.app.core.designsystem.theme.ThemeMode
+import com.expensetracker.app.core.util.LocaleHelper
 import com.expensetracker.app.data.backup.BackupService
 import com.expensetracker.app.data.local.datastore.UserPreferences
 import com.expensetracker.app.data.local.database.AppDatabase
@@ -19,6 +20,9 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import android.util.Log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 data class SettingsActionState(
     val isExporting: Boolean = false,
@@ -57,6 +61,10 @@ class SettingsViewModel @Inject constructor(
     fun setGeminiApiKeyOverride(key: String) = viewModelScope.launch { preferencesRepository.setGeminiApiKeyOverride(key) }
     fun setDailyReminderEnabled(enabled: Boolean) = viewModelScope.launch { preferencesRepository.setDailyReminderEnabled(enabled) }
     fun setBudgetAlertsEnabled(enabled: Boolean) = viewModelScope.launch { preferencesRepository.setBudgetAlertsEnabled(enabled) }
+    fun setLanguage(language: String) {
+        LocaleHelper.setLanguage(context, language)
+        viewModelScope.launch { preferencesRepository.setLanguage(language) }
+    }
 
     fun exportData(uri: Uri) {
         viewModelScope.launch {
@@ -89,8 +97,21 @@ class SettingsViewModel @Inject constructor(
 
     fun clearAllData() {
         viewModelScope.launch {
-            runCatching { appDatabase.clearAllTables() }
-            _actionState.update { it.copy(showClearConfirm = false) }
+            try {
+                Log.d("CLEAR_DATA", "BUTTON_PRESSED")
+
+                withContext(Dispatchers.IO) {
+                    appDatabase.clearAllTables()
+                }
+
+                Log.d("CLEAR_DATA", "SUCCESS")
+            } catch (e: Exception) {
+                Log.e("CLEAR_DATA", "FAILED", e)
+            }
+
+            _actionState.update {
+                it.copy(showClearConfirm = false)
+            }
         }
     }
 

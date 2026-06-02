@@ -1,5 +1,6 @@
 package com.expensetracker.app.feature.settings.screen
 
+import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -42,16 +43,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.expensetracker.app.BuildConfig
+import com.expensetracker.app.R
 import com.expensetracker.app.core.designsystem.theme.ThemeMode
 import com.expensetracker.app.feature.settings.SettingsViewModel
 import java.time.LocalDateTime
 
 private val CURRENCIES = listOf("VND", "USD", "EUR", "GBP", "JPY", "SGD", "THB")
+
+private data class LanguageOption(val code: String, val labelRes: Int)
+
+private val LANGUAGES = listOf(
+    LanguageOption("en", R.string.settings_language_english),
+    LanguageOption("vi", R.string.settings_language_vietnamese),
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,6 +73,10 @@ fun SettingsScreen(
     val prefs by viewModel.preferences.collectAsStateWithLifecycle()
     val actionState by viewModel.actionState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
+
+    val exportSuccessMsg = stringResource(R.string.settings_export_success)
+    val importSuccessMsg = stringResource(R.string.settings_import_success)
 
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/json"),
@@ -73,8 +88,8 @@ fun SettingsScreen(
 
     LaunchedEffect(actionState.error, actionState.exportSuccess, actionState.importSuccess) {
         when {
-            actionState.exportSuccess -> { snackbarHostState.showSnackbar("Data exported successfully"); viewModel.clearError() }
-            actionState.importSuccess -> { snackbarHostState.showSnackbar("Data imported successfully"); viewModel.clearError() }
+            actionState.exportSuccess -> { snackbarHostState.showSnackbar(exportSuccessMsg); viewModel.clearError() }
+            actionState.importSuccess -> { snackbarHostState.showSnackbar(importSuccessMsg); viewModel.clearError() }
             actionState.error != null -> { snackbarHostState.showSnackbar(actionState.error!!); viewModel.clearError() }
         }
     }
@@ -83,10 +98,10 @@ fun SettingsScreen(
     if (actionState.showImportConfirm) {
         AlertDialog(
             onDismissRequest = viewModel::dismissImportConfirm,
-            title = { Text("Import data?") },
-            text = { Text("This will add imported wallets and categories. Existing data is kept.") },
-            confirmButton = { TextButton(onClick = viewModel::confirmImport) { Text("Import") } },
-            dismissButton = { TextButton(onClick = viewModel::dismissImportConfirm) { Text("Cancel") } },
+            title = { Text(stringResource(R.string.settings_import_title)) },
+            text = { Text(stringResource(R.string.settings_import_message)) },
+            confirmButton = { TextButton(onClick = viewModel::confirmImport) { Text(stringResource(R.string.settings_import_confirm)) } },
+            dismissButton = { TextButton(onClick = viewModel::dismissImportConfirm) { Text(stringResource(R.string.action_cancel)) } },
         )
     }
 
@@ -94,20 +109,20 @@ fun SettingsScreen(
     if (actionState.showClearConfirm) {
         AlertDialog(
             onDismissRequest = viewModel::dismissClearConfirm,
-            title = { Text("Clear all data?") },
-            text = { Text("This will permanently delete all transactions, wallets, categories, and budgets. This cannot be undone.") },
+            title = { Text(stringResource(R.string.settings_clear_data_title)) },
+            text = { Text(stringResource(R.string.settings_clear_data_message)) },
             confirmButton = {
                 TextButton(
                     onClick = viewModel::clearAllData,
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
-                ) { Text("Delete everything") }
+                ) { Text(stringResource(R.string.settings_delete_everything)) }
             },
-            dismissButton = { TextButton(onClick = viewModel::dismissClearConfirm) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = viewModel::dismissClearConfirm) { Text(stringResource(R.string.action_cancel)) } },
         )
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Settings") }) },
+        topBar = { TopAppBar(title = { Text(stringResource(R.string.settings_title)) }) },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { innerPadding ->
         Column(
@@ -116,8 +131,26 @@ fun SettingsScreen(
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState()),
         ) {
+            // ---- Language ----
+            SettingsSection(stringResource(R.string.settings_section_language)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    LANGUAGES.forEach { lang ->
+                        FilterChip(
+                            selected = prefs.language == lang.code,
+                            onClick = {
+                                if (prefs.language != lang.code) {
+                                    viewModel.setLanguage(lang.code)
+                                    (context as? Activity)?.recreate()
+                                }
+                            },
+                            label = { Text(stringResource(lang.labelRes)) },
+                        )
+                    }
+                }
+            }
+
             // ---- Preferences ----
-            SettingsSection("Preferences") {
+            SettingsSection(stringResource(R.string.settings_section_preferences)) {
                 var currencyExpanded by remember { mutableStateOf(false) }
                 ExposedDropdownMenuBox(
                     expanded = currencyExpanded,
@@ -127,7 +160,7 @@ fun SettingsScreen(
                         value = prefs.currency,
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Currency") },
+                        label = { Text(stringResource(R.string.settings_currency)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(currencyExpanded) },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -143,12 +176,13 @@ fun SettingsScreen(
                 Spacer(Modifier.height(8.dp))
 
                 var dayExpanded by remember { mutableStateOf(false) }
+                val dayLabel = stringResource(R.string.settings_day_number, prefs.monthStartDay)
                 ExposedDropdownMenuBox(expanded = dayExpanded, onExpandedChange = { dayExpanded = it }) {
                     OutlinedTextField(
-                        value = "Day ${prefs.monthStartDay}",
+                        value = dayLabel,
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Month starts on") },
+                        label = { Text(stringResource(R.string.settings_month_starts_on)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(dayExpanded) },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -156,15 +190,16 @@ fun SettingsScreen(
                     )
                     ExposedDropdownMenu(expanded = dayExpanded, onDismissRequest = { dayExpanded = false }) {
                         (1..28).forEach { day ->
-                            DropdownMenuItem(text = { Text("Day $day") }, onClick = { viewModel.setMonthStartDay(day); dayExpanded = false })
+                            val dayItemLabel = stringResource(R.string.settings_day_number, day)
+                            DropdownMenuItem(text = { Text(dayItemLabel) }, onClick = { viewModel.setMonthStartDay(day); dayExpanded = false })
                         }
                     }
                 }
             }
 
             // ---- Appearance ----
-            SettingsSection("Appearance") {
-                Text("Theme", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            SettingsSection(stringResource(R.string.settings_section_appearance)) {
+                Text(stringResource(R.string.settings_theme), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(Modifier.height(6.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     ThemeMode.entries.forEach { mode ->
@@ -177,18 +212,18 @@ fun SettingsScreen(
                 }
                 Spacer(Modifier.height(8.dp))
                 SettingsSwitchRow(
-                    title = "Dynamic colors",
-                    subtitle = "Use wallpaper colors (Android 12+)",
+                    title = stringResource(R.string.settings_dynamic_colors),
+                    subtitle = stringResource(R.string.settings_dynamic_colors_subtitle),
                     checked = prefs.dynamicColorEnabled,
                     onCheckedChange = viewModel::setDynamicColor,
                 )
             }
 
             // ---- AI ----
-            SettingsSection("AI Features") {
+            SettingsSection(stringResource(R.string.settings_section_ai)) {
                 SettingsSwitchRow(
-                    title = "Enable AI features",
-                    subtitle = "Requires a Gemini API key",
+                    title = stringResource(R.string.settings_ai_enabled),
+                    subtitle = stringResource(R.string.settings_ai_enabled_subtitle),
                     checked = prefs.geminiEnabled,
                     onCheckedChange = viewModel::setGeminiEnabled,
                 )
@@ -197,38 +232,38 @@ fun SettingsScreen(
                 OutlinedTextField(
                     value = apiKeyInput,
                     onValueChange = { apiKeyInput = it },
-                    label = { Text("Custom Gemini API key") },
-                    placeholder = { Text("Overrides build config key") },
+                    label = { Text(stringResource(R.string.settings_gemini_api_key)) },
+                    placeholder = { Text(stringResource(R.string.settings_gemini_api_key_placeholder)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
-                    supportingText = { Text("Leave blank to use the default key") },
+                    supportingText = { Text(stringResource(R.string.settings_gemini_api_key_hint)) },
                 )
                 Spacer(Modifier.height(4.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedButton(onClick = onNavigateToGeminiTest) { Text("Test Gemini ✨") }
-                    Button(onClick = { viewModel.setGeminiApiKeyOverride(apiKeyInput.trim()) }) { Text("Save Key") }
+                    OutlinedButton(onClick = onNavigateToGeminiTest) { Text(stringResource(R.string.settings_test_gemini)) }
+                    Button(onClick = { viewModel.setGeminiApiKeyOverride(apiKeyInput.trim()) }) { Text(stringResource(R.string.settings_save_key)) }
                 }
             }
 
             // ---- Notifications ----
-            SettingsSection("Notifications") {
+            SettingsSection(stringResource(R.string.settings_section_notifications)) {
                 SettingsSwitchRow(
-                    title = "Daily reminder",
-                    subtitle = "Remind me to log expenses at 8 PM",
+                    title = stringResource(R.string.settings_daily_reminder),
+                    subtitle = stringResource(R.string.settings_daily_reminder_subtitle),
                     checked = prefs.dailyReminderEnabled,
                     onCheckedChange = viewModel::setDailyReminderEnabled,
                 )
                 Spacer(Modifier.height(4.dp))
                 SettingsSwitchRow(
-                    title = "Budget alerts",
-                    subtitle = "Notify when approaching budget limits",
+                    title = stringResource(R.string.settings_budget_alerts),
+                    subtitle = stringResource(R.string.settings_budget_alerts_subtitle),
                     checked = prefs.budgetAlertsEnabled,
                     onCheckedChange = viewModel::setBudgetAlertsEnabled,
                 )
             }
 
             // ---- Data ----
-            SettingsSection("Data") {
+            SettingsSection(stringResource(R.string.settings_section_data)) {
                 Button(
                     onClick = {
                         val ts = LocalDateTime.now().toString().take(16).replace(":", "-")
@@ -236,7 +271,7 @@ fun SettingsScreen(
                     },
                     enabled = !actionState.isExporting,
                     modifier = Modifier.fillMaxWidth(),
-                ) { Text(if (actionState.isExporting) "Exporting…" else "Export to JSON") }
+                ) { Text(if (actionState.isExporting) stringResource(R.string.settings_exporting) else stringResource(R.string.settings_export_json)) }
 
                 Spacer(Modifier.height(8.dp))
 
@@ -244,7 +279,7 @@ fun SettingsScreen(
                     onClick = { importLauncher.launch(arrayOf("application/json")) },
                     enabled = !actionState.isImporting,
                     modifier = Modifier.fillMaxWidth(),
-                ) { Text(if (actionState.isImporting) "Importing…" else "Import from JSON") }
+                ) { Text(if (actionState.isImporting) stringResource(R.string.settings_importing) else stringResource(R.string.settings_import_json)) }
 
                 Spacer(Modifier.height(8.dp))
 
@@ -252,14 +287,14 @@ fun SettingsScreen(
                     onClick = viewModel::requestClearData,
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
-                ) { Text("Clear all data") }
+                ) { Text(stringResource(R.string.settings_clear_data)) }
             }
 
             // ---- About ----
-            SettingsSection("About") {
-                SettingsInfoRow("App version", BuildConfig.VERSION_NAME)
-                SettingsInfoRow("Build", BuildConfig.VERSION_CODE.toString())
-                SettingsInfoRow("Package", BuildConfig.APPLICATION_ID)
+            SettingsSection(stringResource(R.string.settings_section_about)) {
+                SettingsInfoRow(stringResource(R.string.settings_app_version), BuildConfig.VERSION_NAME)
+                SettingsInfoRow(stringResource(R.string.settings_build), BuildConfig.VERSION_CODE.toString())
+                SettingsInfoRow(stringResource(R.string.settings_package), BuildConfig.APPLICATION_ID)
             }
 
             Spacer(Modifier.height(32.dp))

@@ -21,6 +21,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.expensetracker.app.R
 
 @Composable
 fun ChatInput(
@@ -39,7 +41,7 @@ fun ChatInput(
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
-            placeholder = { Text("Ask about your finances…") },
+            placeholder = { Text(stringResource(R.string.ai_input_hint)) },
             modifier = Modifier.weight(1f),
             maxLines = 4,
             enabled = !isLoading,

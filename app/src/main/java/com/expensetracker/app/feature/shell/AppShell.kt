@@ -66,6 +66,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -76,6 +77,7 @@ import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.expensetracker.app.R
 import com.expensetracker.app.core.designsystem.component.AppPrimaryButton
 import com.expensetracker.app.core.designsystem.component.AppTextField
 import com.expensetracker.app.domain.model.TransactionType
@@ -107,8 +109,9 @@ fun AppShell(startDestination: Any = Home) {
 
     val showBottomBar = currentDest.isTabDestination()
 
-    // AiAssistant manages its own top bar with screen-specific actions
-    val showGlobalTopBar = currentDest?.hasRoute(AiAssistant::class) != true
+    // AiAssistant and TransactionList manage their own top bars
+    val showGlobalTopBar = currentDest?.hasRoute(AiAssistant::class) != true &&
+        currentDest?.hasRoute(TransactionList::class) != true
 
     Scaffold(
         topBar = {
@@ -167,7 +170,7 @@ private fun AppTopBar(
                 IconButton(onClick = onNavigateUp) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
+                        contentDescription = stringResource(R.string.action_back),
                     )
                 }
             }
@@ -177,7 +180,7 @@ private fun AppTopBar(
                 IconButton(onClick = onNavigateToSettings) {
                     Icon(
                         imageVector = Icons.Outlined.Settings,
-                        contentDescription = "Settings",
+                        contentDescription = stringResource(R.string.nav_settings),
                     )
                 }
             }
@@ -188,21 +191,38 @@ private fun AppTopBar(
     )
 }
 
-private fun topBarInfo(dest: NavDestination?): Pair<String, Boolean> = when {
-    dest?.hasRoute(Home::class) == true -> "Expense Tracker" to true
-    dest?.hasRoute(TransactionList::class) == true -> "Transactions" to true
-    dest?.hasRoute(Statistics::class) == true -> "Statistics" to true
-    dest?.hasRoute(AiAssistant::class) == true -> "AI Assistant ✨" to true
-    dest?.hasRoute(AddEditTransaction::class) == true -> "Add Transaction" to false
-    dest?.hasRoute(TransactionDetail::class) == true -> "Transaction" to false
-    dest?.hasRoute(Categories::class) == true -> "Categories" to false
-    dest?.hasRoute(Budgets::class) == true -> "Budgets" to false
-    dest?.hasRoute(Recurring::class) == true -> "Recurring" to false
-    dest?.hasRoute(ReceiptScanner::class) == true -> "Scan Receipt" to false
-    dest?.hasRoute(WalletManagement::class) == true -> "Wallets" to false
-    dest?.hasRoute(Settings::class) == true -> "Settings" to false
-    dest?.hasRoute(Onboarding::class) == true -> "Get Started" to false
-    else -> "Expense Tracker" to true
+@Composable
+private fun topBarInfo(dest: NavDestination?): Pair<String, Boolean> {
+    val appName = stringResource(R.string.app_name)
+    val navTransactions = stringResource(R.string.nav_transactions)
+    val navStatistics = stringResource(R.string.nav_statistics)
+    val aiTitle = stringResource(R.string.ai_title)
+    val navAddTransaction = stringResource(R.string.nav_add_transaction)
+    val navTransactionDetail = stringResource(R.string.nav_transaction_detail)
+    val navCategories = stringResource(R.string.nav_categories)
+    val navBudgets = stringResource(R.string.nav_budgets)
+    val navRecurring = stringResource(R.string.nav_recurring)
+    val ocrTitle = stringResource(R.string.ocr_title)
+    val navWallets = stringResource(R.string.nav_wallets)
+    val navSettings = stringResource(R.string.nav_settings)
+    val navGetStarted = stringResource(R.string.nav_get_started)
+
+    return when {
+        dest?.hasRoute(Home::class) == true -> appName to true
+        dest?.hasRoute(TransactionList::class) == true -> navTransactions to true
+        dest?.hasRoute(Statistics::class) == true -> navStatistics to true
+        dest?.hasRoute(AiAssistant::class) == true -> aiTitle to true
+        dest?.hasRoute(AddEditTransaction::class) == true -> navAddTransaction to false
+        dest?.hasRoute(TransactionDetail::class) == true -> navTransactionDetail to false
+        dest?.hasRoute(Categories::class) == true -> navCategories to false
+        dest?.hasRoute(Budgets::class) == true -> navBudgets to false
+        dest?.hasRoute(Recurring::class) == true -> navRecurring to false
+        dest?.hasRoute(ReceiptScanner::class) == true -> ocrTitle to false
+        dest?.hasRoute(WalletManagement::class) == true -> navWallets to false
+        dest?.hasRoute(Settings::class) == true -> navSettings to false
+        dest?.hasRoute(Onboarding::class) == true -> navGetStarted to false
+        else -> appName to true
+    }
 }
 
 // ---- Bottom Navigation Bar ----
@@ -223,10 +243,10 @@ private fun AppBottomBar(
                         imageVector = if (currentDest?.hasRoute(Home::class) == true) {
                             Icons.Filled.Home
                         } else Icons.Outlined.Home,
-                        contentDescription = "Home",
+                        contentDescription = stringResource(R.string.nav_home),
                     )
                 },
-                label = { Text("Home") },
+                label = { Text(stringResource(R.string.nav_home)) },
             )
             NavigationBarItem(
                 selected = currentDest?.hasRoute(TransactionList::class) == true,
@@ -236,10 +256,10 @@ private fun AppBottomBar(
                         imageVector = if (currentDest?.hasRoute(TransactionList::class) == true) {
                             Icons.AutoMirrored.Filled.ReceiptLong
                         } else Icons.AutoMirrored.Outlined.ReceiptLong,
-                        contentDescription = "Transactions",
+                        contentDescription = stringResource(R.string.nav_transactions),
                     )
                 },
-                label = { Text("Transactions") },
+                label = { Text(stringResource(R.string.nav_transactions)) },
             )
 
             // Center placeholder for the FAB (equal weight to keep symmetry)
@@ -253,10 +273,10 @@ private fun AppBottomBar(
                         imageVector = if (currentDest?.hasRoute(Statistics::class) == true) {
                             Icons.Filled.BarChart
                         } else Icons.Outlined.BarChart,
-                        contentDescription = "Statistics",
+                        contentDescription = stringResource(R.string.nav_statistics),
                     )
                 },
-                label = { Text("Stats") },
+                label = { Text(stringResource(R.string.nav_stats)) },
             )
             NavigationBarItem(
                 selected = currentDest?.hasRoute(AiAssistant::class) == true,
@@ -266,10 +286,10 @@ private fun AppBottomBar(
                         imageVector = if (currentDest?.hasRoute(AiAssistant::class) == true) {
                             Icons.Filled.AutoAwesome
                         } else Icons.Outlined.AutoAwesome,
-                        contentDescription = "AI",
+                        contentDescription = stringResource(R.string.nav_ai),
                     )
                 },
-                label = { Text("AI") },
+                label = { Text(stringResource(R.string.nav_ai)) },
             )
         }
 
@@ -286,19 +306,13 @@ private fun AppBottomBar(
         ) {
             Icon(
                 imageVector = Icons.Default.Add,
-                contentDescription = "Quick Add",
+                contentDescription = stringResource(R.string.quick_add_title),
             )
         }
     }
 }
 
 // ---- Quick-Add Bottom Sheet ----
-
-private val NL_EXAMPLES = listOf(
-    "Bought groceries 200k",
-    "Salary 15 million today",
-    "Coffee with friends 80k yesterday",
-)
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -323,10 +337,10 @@ private fun QuickAddBottomSheet(
                 edgePadding = 0.dp,
             ) {
                 Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 }) {
-                    Text("Manual", modifier = Modifier.padding(vertical = 12.dp))
+                    Text(stringResource(R.string.quick_add_manual), modifier = Modifier.padding(vertical = 12.dp))
                 }
                 Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 }) {
-                    Text("✨ AI Parse", modifier = Modifier.padding(vertical = 12.dp))
+                    Text(stringResource(R.string.quick_add_ai_parse), modifier = Modifier.padding(vertical = 12.dp))
                 }
             }
 
@@ -373,19 +387,19 @@ private fun ManualQuickAddTab(
         AppTextField(
             value = amount,
             onValueChange = { amount = it },
-            label = "Amount",
+            label = stringResource(R.string.quick_add_amount),
             placeholder = "0",
         )
         Spacer(Modifier.height(8.dp))
         AppTextField(
             value = note,
             onValueChange = { note = it },
-            label = "Note",
-            placeholder = "What was this for?",
+            label = stringResource(R.string.quick_add_note),
+            placeholder = stringResource(R.string.transaction_note_hint),
         )
         Spacer(Modifier.height(16.dp))
         AppPrimaryButton(
-            text = "Open Full Form",
+            text = stringResource(R.string.quick_add_open_full),
             onClick = { onNavigateToAddTransaction(amount.toDoubleOrNull(), note.takeIf { it.isNotBlank() }) },
             modifier = Modifier.fillMaxWidth(),
         )
@@ -400,6 +414,14 @@ private fun NaturalLanguageTab(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val dateFmt = DateTimeFormatter.ofPattern("dd MMM yyyy")
+
+    val nlExamples = listOf(
+        stringResource(R.string.quick_add_example_1),
+        stringResource(R.string.quick_add_example_2),
+        stringResource(R.string.quick_add_example_3),
+    )
+
+    val voicePrompt = stringResource(R.string.quick_add_voice_prompt)
 
     val speechLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult(),
@@ -423,7 +445,7 @@ private fun NaturalLanguageTab(
             OutlinedTextField(
                 value = state.nlInput,
                 onValueChange = viewModel::onInputChanged,
-                placeholder = { Text("Describe your expense — e.g. '50k for coffee this morning'") },
+                placeholder = { Text(stringResource(R.string.quick_add_nl_hint)) },
                 modifier = Modifier.weight(1f),
                 maxLines = 3,
             )
@@ -432,14 +454,14 @@ private fun NaturalLanguageTab(
                 onClick = {
                     val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                         putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                        putExtra(RecognizerIntent.EXTRA_PROMPT, "Describe your transaction")
+                        putExtra(RecognizerIntent.EXTRA_PROMPT, voicePrompt)
                     }
                     speechLauncher.launch(intent)
                 },
             ) {
                 Icon(
                     imageVector = Icons.Default.Mic,
-                    contentDescription = "Voice input",
+                    contentDescription = stringResource(R.string.quick_add_voice_input),
                     tint = MaterialTheme.colorScheme.primary,
                 )
             }
@@ -450,7 +472,7 @@ private fun NaturalLanguageTab(
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                NL_EXAMPLES.forEach { example ->
+                nlExamples.forEach { example ->
                     AssistChip(
                         onClick = { viewModel.onInputChanged(example) },
                         label = { Text(example, style = MaterialTheme.typography.labelSmall) },
@@ -472,7 +494,7 @@ private fun NaturalLanguageTab(
                     color = MaterialTheme.colorScheme.onPrimary,
                 )
             } else {
-                Text("Parse with AI ✨")
+                Text(stringResource(R.string.quick_add_parse_ai))
             }
         }
 
@@ -498,13 +520,13 @@ private fun NaturalLanguageTab(
                     modifier = Modifier.padding(12.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    Text("Parsed Result", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-                    Text("Amount: ${parsed.amount.toLong()}")
-                    Text("Type: ${parsed.type.name}")
-                    Text("Date: ${parsed.date.format(dateFmt)}")
-                    Text("Note: ${parsed.note}")
+                    Text(stringResource(R.string.quick_add_parsed_result), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.quick_add_amount_result, parsed.amount.toLong()))
+                    Text(stringResource(R.string.quick_add_type_result, parsed.type.name))
+                    Text(stringResource(R.string.quick_add_date_result, parsed.date.format(dateFmt)))
+                    Text(stringResource(R.string.quick_add_note_result, parsed.note))
                     if (state.parsedCategoryName != null) {
-                        Text("Category: ${state.parsedCategoryName}")
+                        Text(stringResource(R.string.quick_add_category_result, state.parsedCategoryName!!))
                     }
                 }
             }
@@ -515,7 +537,7 @@ private fun NaturalLanguageTab(
                 },
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Use This →")
+                Text(stringResource(R.string.action_use_this))
             }
         }
     }

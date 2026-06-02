@@ -41,10 +41,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.expensetracker.app.R
 import com.expensetracker.app.core.designsystem.component.EmptyState
 import com.expensetracker.app.core.designsystem.component.SectionHeader
 import com.expensetracker.app.core.designsystem.component.ShimmerBox
@@ -109,9 +111,9 @@ fun HomeScreen(
             if (isEmpty) {
                 item {
                     EmptyState(
-                        title = "No transactions yet",
-                        message = "Add your first transaction to start tracking your finances",
-                        actionLabel = "Add Transaction",
+                        title = stringResource(R.string.home_empty_title),
+                        message = stringResource(R.string.home_empty_message),
+                        actionLabel = stringResource(R.string.home_add_transaction),
                         onAction = onNavigateToAddTransaction,
                         modifier = Modifier.padding(horizontal = 16.dp),
                     )
@@ -169,7 +171,7 @@ fun HomeScreen(
                     item { Spacer(Modifier.height(12.dp)) }
                     item {
                         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                            SectionHeader(title = "Active Budgets")
+                            SectionHeader(title = stringResource(R.string.home_active_budgets))
                         }
                     }
                     item {
@@ -201,11 +203,11 @@ fun HomeScreen(
 
                 item {
                     SectionHeader(
-                        title = "Recent Transactions",
+                        title = stringResource(R.string.home_recent_transactions),
                         modifier = Modifier.padding(horizontal = 16.dp),
                         action = {
                             TextButton(onClick = onNavigateToTransactions) {
-                                Text("See all")
+                                Text(stringResource(R.string.action_see_all))
                             }
                         },
                     )
@@ -245,7 +247,7 @@ private fun HomeHeader(
 ) {
     Column(modifier = modifier) {
         Text(
-            text = "${greeting()}, there 👋",
+            text = greeting(),
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
             color = MaterialTheme.colorScheme.onSurface,
         )
@@ -258,7 +260,7 @@ private fun HomeHeader(
             IconButton(onClick = onPrevMonth) {
                 Icon(
                     imageVector = Icons.Default.ChevronLeft,
-                    contentDescription = "Previous month",
+                    contentDescription = stringResource(R.string.home_prev_month),
                     tint = MaterialTheme.colorScheme.primary,
                 )
             }
@@ -271,7 +273,7 @@ private fun HomeHeader(
             IconButton(onClick = onNextMonth) {
                 Icon(
                     imageVector = Icons.Default.ChevronRight,
-                    contentDescription = "Next month",
+                    contentDescription = stringResource(R.string.home_next_month),
                     tint = MaterialTheme.colorScheme.primary,
                 )
             }
@@ -292,19 +294,19 @@ private fun QuickActionsRow(
     ) {
         QuickActionButton(
             icon = Icons.AutoMirrored.Filled.ReceiptLong,
-            label = "Scan Receipt",
+            label = stringResource(R.string.home_quick_scan_receipt),
             onClick = onScanReceipt,
             modifier = Modifier.weight(1f),
         )
         QuickActionButton(
             icon = Icons.Default.AutoAwesome,
-            label = "AI Chat",
+            label = stringResource(R.string.home_quick_ai_chat),
             onClick = onAiChat,
             modifier = Modifier.weight(1f),
         )
         QuickActionButton(
             icon = Icons.Default.Repeat,
-            label = "Recurring",
+            label = stringResource(R.string.home_quick_recurring),
             onClick = onAddRecurring,
             modifier = Modifier.weight(1f),
         )
@@ -361,8 +363,9 @@ private fun HomeLoadingShimmer() {
     }
 }
 
+@Composable
 private fun greeting(): String = when (LocalTime.now().hour) {
-    in 0..11 -> "Good morning"
-    in 12..17 -> "Good afternoon"
-    else -> "Good evening"
+    in 0..11 -> stringResource(R.string.greeting_morning)
+    in 12..17 -> stringResource(R.string.greeting_afternoon)
+    else -> stringResource(R.string.greeting_evening)
 }

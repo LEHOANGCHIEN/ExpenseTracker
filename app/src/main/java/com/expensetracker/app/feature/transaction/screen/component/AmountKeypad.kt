@@ -30,12 +30,12 @@ fun AmountKeypad(
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         KEYPAD_LAYOUT.forEach { row ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 row.forEach { key ->
                     KeypadButton(
@@ -50,7 +50,7 @@ fun AmountKeypad(
         // Clear row
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             KeypadButton(
                 label = "AC",
@@ -81,12 +81,12 @@ private fun KeypadButton(
     if (isOperator) {
         FilledTonalButton(
             onClick = onClick,
-            modifier = modifier.height(52.dp),
+            modifier = modifier.height(44.dp),
             shape = shape,
         ) {
             Text(
                 text = label,
-                fontSize = 20.sp,
+                fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
             )
@@ -94,7 +94,7 @@ private fun KeypadButton(
     } else {
         OutlinedButton(
             onClick = onClick,
-            modifier = modifier.height(52.dp),
+            modifier = modifier.height(44.dp),
             shape = shape,
         ) {
             Text(

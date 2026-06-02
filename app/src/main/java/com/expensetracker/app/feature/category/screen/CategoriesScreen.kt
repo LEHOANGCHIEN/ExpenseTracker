@@ -44,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -51,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.expensetracker.app.R
 import com.expensetracker.app.core.designsystem.component.EmptyState
 import com.expensetracker.app.core.designsystem.component.ShimmerBox
 import com.expensetracker.app.core.util.CurrencyFormatter
@@ -73,10 +75,10 @@ fun CategoriesScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Categories") },
+                title = { Text(stringResource(R.string.nav_categories)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back))
                     }
                 },
             )
@@ -86,7 +88,7 @@ fun CategoriesScreen(
                 onClick = onNavigateToAddCategory,
                 containerColor = MaterialTheme.colorScheme.primary,
             ) {
-                Icon(Icons.Default.Add, "Add Category")
+                Icon(Icons.Default.Add, stringResource(R.string.category_add))
             }
         },
     ) { padding ->
@@ -96,21 +98,23 @@ fun CategoriesScreen(
                 Tab(
                     selected = state.selectedTab == TransactionType.EXPENSE,
                     onClick = { viewModel.onEvent(CategoriesEvent.TabSelected(TransactionType.EXPENSE)) },
-                    text = { Text("Expense") },
+                    text = { Text(stringResource(R.string.category_expense_tab)) },
                 )
                 Tab(
                     selected = state.selectedTab == TransactionType.INCOME,
                     onClick = { viewModel.onEvent(CategoriesEvent.TabSelected(TransactionType.INCOME)) },
-                    text = { Text("Income") },
+                    text = { Text(stringResource(R.string.category_income_tab)) },
                 )
             }
 
             when {
                 state.isLoading -> CategoriesShimmer()
                 state.currentTabCategories.isEmpty() -> EmptyState(
-                    title = "No categories",
-                    message = "Tap + to add your first ${state.selectedTab.name.lowercase()} category",
-                    actionLabel = "Add Category",
+                    title = stringResource(R.string.category_empty_title),
+                    message = if (state.selectedTab == TransactionType.EXPENSE)
+                        stringResource(R.string.category_empty_expense_hint)
+                    else stringResource(R.string.category_empty_income_hint),
+                    actionLabel = stringResource(R.string.category_add),
                     onAction = onNavigateToAddCategory,
                     modifier = Modifier.fillMaxSize(),
                 )
@@ -143,18 +147,18 @@ fun CategoriesScreen(
     state.deleteBlockedCategory?.let { cat ->
         AlertDialog(
             onDismissRequest = { viewModel.onEvent(CategoriesEvent.DismissDeleteBlocked) },
-            title = { Text("Cannot Delete") },
+            title = { Text(stringResource(R.string.category_cannot_delete_title)) },
             text = {
-                Text("\"${cat.name}\" has existing transactions. Archive it instead to hide it from new transactions?")
+                Text(stringResource(R.string.category_cannot_delete_message, cat.name))
             },
             confirmButton = {
                 TextButton(onClick = { viewModel.onEvent(CategoriesEvent.ArchiveCategory(cat.id)) }) {
-                    Text("Archive")
+                    Text(stringResource(R.string.action_archive))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { viewModel.onEvent(CategoriesEvent.DismissDeleteBlocked) }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.action_cancel))
                 }
             },
         )
@@ -261,17 +265,17 @@ private fun CategoryActionSheet(
 
             ActionSheetItem(
                 icon = Icons.Default.Edit,
-                label = "Edit",
+                label = stringResource(R.string.action_edit),
                 onClick = onEdit,
             )
             ActionSheetItem(
                 icon = Icons.Default.Archive,
-                label = "Archive",
+                label = stringResource(R.string.action_archive),
                 onClick = onArchive,
             )
             ActionSheetItem(
                 icon = Icons.Default.Delete,
-                label = "Delete",
+                label = stringResource(R.string.action_delete),
                 tint = MaterialTheme.colorScheme.error,
                 onClick = onDelete,
             )

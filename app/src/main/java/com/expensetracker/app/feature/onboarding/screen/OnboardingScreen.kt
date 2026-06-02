@@ -44,10 +44,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.expensetracker.app.R
 import com.expensetracker.app.feature.onboarding.OnboardingViewModel
 import kotlinx.coroutines.launch
 
@@ -79,7 +81,7 @@ fun OnboardingScreen(
                 TextButton(onClick = {
                     viewModel.completeOnboarding(currency, monthStartDay, dailyReminder)
                     onFinish()
-                }) { Text("Skip") }
+                }) { Text(stringResource(R.string.action_skip)) }
             }
         }
 
@@ -137,7 +139,7 @@ fun OnboardingScreen(
         ) {
             if (pagerState.currentPage > 0) {
                 TextButton(onClick = { scope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) } }) {
-                    Text("Back")
+                    Text(stringResource(R.string.action_back))
                 }
             } else {
                 Spacer(Modifier.width(80.dp))
@@ -145,14 +147,14 @@ fun OnboardingScreen(
 
             if (pagerState.currentPage < 3) {
                 Button(onClick = { scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) } }) {
-                    Text("Next")
+                    Text(stringResource(R.string.action_next))
                 }
             } else {
                 Button(onClick = {
                     viewModel.completeOnboarding(currency, monthStartDay, dailyReminder)
                     onFinish()
                 }) {
-                    Text("Get Started")
+                    Text(stringResource(R.string.action_get_started))
                 }
             }
         }
@@ -163,8 +165,8 @@ fun OnboardingScreen(
 private fun WelcomePage() {
     OnboardingPageLayout(
         icon = Icons.Default.AccountBalanceWallet,
-        title = "Expense Tracker",
-        subtitle = "Take control of your finances.\nTrack, analyze, and improve — with AI by your side.",
+        title = stringResource(R.string.onboarding_welcome_title),
+        subtitle = stringResource(R.string.onboarding_welcome_subtitle),
     )
 }
 
@@ -172,8 +174,8 @@ private fun WelcomePage() {
 private fun TrackPage() {
     OnboardingPageLayout(
         icon = Icons.Default.BarChart,
-        title = "Track in seconds",
-        subtitle = "Add transactions instantly with quick-add or natural language.\n\"Coffee 50k this morning\" — done.",
+        title = stringResource(R.string.onboarding_track_title),
+        subtitle = stringResource(R.string.onboarding_track_subtitle),
     )
 }
 
@@ -181,8 +183,8 @@ private fun TrackPage() {
 private fun AiPage() {
     OnboardingPageLayout(
         icon = Icons.Default.AutoAwesome,
-        title = "AI-powered insights",
-        subtitle = "Your personal financial advisor understands your spending.\nGet actionable advice based on your actual data.",
+        title = stringResource(R.string.onboarding_ai_title),
+        subtitle = stringResource(R.string.onboarding_ai_subtitle),
     )
 }
 
@@ -214,13 +216,13 @@ private fun SetupPage(
         )
         Spacer(Modifier.height(16.dp))
         Text(
-            text = "Quick Setup",
+            text = stringResource(R.string.onboarding_setup_title),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
         )
         Spacer(Modifier.height(8.dp))
         Text(
-            text = "These can be changed anytime in Settings",
+            text = stringResource(R.string.onboarding_setup_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
@@ -233,7 +235,7 @@ private fun SetupPage(
                 value = currency,
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Currency") },
+                label = { Text(stringResource(R.string.onboarding_currency)) },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(currencyExpanded) },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -251,10 +253,10 @@ private fun SetupPage(
         // Month start day
         ExposedDropdownMenuBox(expanded = dayExpanded, onExpandedChange = { dayExpanded = it }) {
             OutlinedTextField(
-                value = "Day $monthStartDay",
+                value = stringResource(R.string.onboarding_day_number, monthStartDay),
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Month starts on") },
+                label = { Text(stringResource(R.string.onboarding_month_starts_on)) },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(dayExpanded) },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -262,7 +264,7 @@ private fun SetupPage(
             )
             ExposedDropdownMenu(expanded = dayExpanded, onDismissRequest = { dayExpanded = false }) {
                 (1..28).forEach { day ->
-                    DropdownMenuItem(text = { Text("Day $day") }, onClick = { onMonthStartDayChange(day); dayExpanded = false })
+                    DropdownMenuItem(text = { Text(stringResource(R.string.onboarding_day_number, day)) }, onClick = { onMonthStartDayChange(day); dayExpanded = false })
                 }
             }
         }
@@ -280,8 +282,8 @@ private fun SetupPage(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column {
-                Text("Daily Reminder", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
-                Text("Get reminded to log your expenses", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(stringResource(R.string.onboarding_daily_reminder), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+                Text(stringResource(R.string.onboarding_daily_reminder_subtitle), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Switch(checked = dailyReminder, onCheckedChange = onDailyReminderChange)
         }

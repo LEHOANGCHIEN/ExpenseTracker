@@ -30,6 +30,7 @@ class UserPreferencesDataStore @Inject constructor(
         val MONTH_START_DAY = intPreferencesKey("month_start_day")
         val DAILY_REMINDER_ENABLED = booleanPreferencesKey("daily_reminder_enabled")
         val BUDGET_ALERTS_ENABLED = booleanPreferencesKey("budget_alerts_enabled")
+        val LANGUAGE = stringPreferencesKey("language")
     }
 
     val preferences: Flow<UserPreferences> = dataStore.data
@@ -48,6 +49,7 @@ class UserPreferencesDataStore @Inject constructor(
                 monthStartDay = prefs[Keys.MONTH_START_DAY] ?: 1,
                 dailyReminderEnabled = prefs[Keys.DAILY_REMINDER_ENABLED] ?: true,
                 budgetAlertsEnabled = prefs[Keys.BUDGET_ALERTS_ENABLED] ?: true,
+                language = prefs[Keys.LANGUAGE] ?: "en",
             )
         }
 
@@ -80,4 +82,7 @@ class UserPreferencesDataStore @Inject constructor(
 
     suspend fun setBudgetAlertsEnabled(enabled: Boolean) =
         dataStore.edit { it[Keys.BUDGET_ALERTS_ENABLED] = enabled }
+
+    suspend fun setLanguage(language: String) =
+        dataStore.edit { it[Keys.LANGUAGE] = language }
 }

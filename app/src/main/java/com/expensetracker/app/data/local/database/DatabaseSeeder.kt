@@ -28,21 +28,22 @@ object DatabaseSeeder {
 
         val categories = listOf(
             // Expense categories
-            Triple("Food", "🍔", "#FFA726") to expense,
-            Triple("Transport", "🚗", "#42A5F5") to expense,
-            Triple("Shopping", "🛍️", "#EC407A") to expense,
-            Triple("Entertainment", "🎬", "#AB47BC") to expense,
-            Triple("Bills", "💡", "#FFEE58") to expense,
-            Triple("Health", "🏥", "#EF5350") to expense,
-            Triple("Education", "📚", "#5C6BC0") to expense,
-            Triple("Travel", "✈️", "#29B6F6") to expense,
-            Triple("Groceries", "🛒", "#66BB6A") to expense,
-            Triple("Other", "📦", "#78909C") to expense,
+            Triple("Ăn uống", "🍔", "#FFA726") to expense,
+            Triple("Di chuyển", "🚗", "#42A5F5") to expense,
+            Triple("Mua sắm", "🛍️", "#EC407A") to expense,
+            Triple("Giải trí", "🎬", "#AB47BC") to expense,
+            Triple("Hóa đơn", "💡", "#FFEE58") to expense,
+            Triple("Sức khỏe", "🏥", "#EF5350") to expense,
+            Triple("Giáo dục", "📚", "#5C6BC0") to expense,
+            Triple("Du lịch", "✈️", "#29B6F6") to expense,
+            Triple("Tạp hóa", "🛒", "#66BB6A") to expense,
+            Triple("Khác", "📦", "#78909C") to expense,
+
             // Income categories
-            Triple("Salary", "💼", "#43A047") to income,
-            Triple("Bonus", "🎁", "#EC407A") to income,
-            Triple("Investment", "📈", "#26A69A") to income,
-            Triple("Other Income", "💰", "#FF9800") to income,
+            Triple("Lương", "💼", "#43A047") to income,
+            Triple("Thưởng", "🎁", "#EC407A") to income,
+            Triple("Đầu tư", "📈", "#26A69A") to income,
+            Triple("Thu nhập khác", "💰", "#FF9800") to income,
         )
 
         categories.forEach { (info, type) ->

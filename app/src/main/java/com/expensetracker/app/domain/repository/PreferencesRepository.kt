@@ -16,4 +16,5 @@ interface PreferencesRepository {
     suspend fun setMonthStartDay(day: Int)
     suspend fun setDailyReminderEnabled(enabled: Boolean)
     suspend fun setBudgetAlertsEnabled(enabled: Boolean)
+    suspend fun setLanguage(language: String)
 }

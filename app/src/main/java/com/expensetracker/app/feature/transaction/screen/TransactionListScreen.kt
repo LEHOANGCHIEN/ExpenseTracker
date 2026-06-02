@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FilterList
@@ -46,10 +48,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.expensetracker.app.R
 import com.expensetracker.app.core.designsystem.component.EmptyState
 import com.expensetracker.app.core.designsystem.component.ShimmerBox
 import com.expensetracker.app.core.util.DateUtils
@@ -71,11 +75,14 @@ fun TransactionListScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var isSearchActive by remember { mutableStateOf(false) }
 
+    val deletedMsg = stringResource(R.string.transaction_deleted)
+    val undoLabel = stringResource(R.string.transaction_undo)
+
     LaunchedEffect(state.pendingDeleteTransaction) {
         state.pendingDeleteTransaction?.let { txn ->
             val result = snackbarHostState.showSnackbar(
-                message = "Transaction deleted",
-                actionLabel = "Undo",
+                message = deletedMsg,
+                actionLabel = undoLabel,
                 duration = SnackbarDuration.Short,
             )
             if (result == SnackbarResult.ActionPerformed) {
@@ -90,19 +97,19 @@ fun TransactionListScreen(
                 TopAppBar(
                     title = {
                         if (state.isInSelectionMode) {
-                            Text("${state.selectedIds.size} selected")
+                            Text(stringResource(R.string.transaction_selected_count, state.selectedIds.size))
                         } else {
-                            Text("Transactions")
+                            Text(stringResource(R.string.nav_transactions))
                         }
                     },
                     navigationIcon = {
                         if (state.isInSelectionMode) {
                             IconButton(onClick = { viewModel.onEvent(TransactionListUiEvent.ClearSelection) }) {
-                                Icon(Icons.Default.Close, "Clear selection")
+                                Icon(Icons.Default.Close, stringResource(R.string.transaction_clear_selection))
                             }
                         } else {
                             IconButton(onClick = onNavigateBack) {
-                                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back))
                             }
                         }
                     },
@@ -111,11 +118,14 @@ fun TransactionListScreen(
                             IconButton(onClick = {
                                 viewModel.onEvent(TransactionListUiEvent.BulkDelete(state.selectedIds))
                             }) {
-                                Icon(Icons.Default.Delete, "Delete selected", tint = MaterialTheme.colorScheme.error)
+                                Icon(Icons.Default.Delete, stringResource(R.string.transaction_delete_selected), tint = MaterialTheme.colorScheme.error)
                             }
                         } else {
+                            IconButton(onClick = { onNavigateToAddEdit(null) }) {
+                                Icon(Icons.Default.Add, stringResource(R.string.home_add_transaction))
+                            }
                             IconButton(onClick = { isSearchActive = !isSearchActive }) {
-                                Icon(Icons.Default.Search, "Search")
+                                Icon(Icons.Default.Search, stringResource(R.string.transaction_search))
                             }
                             BadgedBox(
                                 badge = {
@@ -125,7 +135,7 @@ fun TransactionListScreen(
                                 }
                             ) {
                                 IconButton(onClick = { viewModel.onEvent(TransactionListUiEvent.ShowFilterSheet) }) {
-                                    Icon(Icons.Default.FilterList, "Filter")
+                                    Icon(Icons.Default.FilterList, stringResource(R.string.transaction_filter))
                                 }
                             }
                         }
@@ -142,7 +152,7 @@ fun TransactionListScreen(
                                 onSearch = {},
                                 expanded = false,
                                 onExpandedChange = {},
-                                placeholder = { Text("Search transactions…") },
+                                placeholder = { Text(stringResource(R.string.transaction_search_hint)) },
                                 trailingIcon = {
                                     if (state.searchQuery.isNotEmpty()) {
                                         IconButton(onClick = { viewModel.onEvent(TransactionListUiEvent.SearchQueryChanged("")) }) {
@@ -166,9 +176,9 @@ fun TransactionListScreen(
         when {
             state.isLoading -> TransactionListShimmer(Modifier.padding(padding))
             state.isEmpty -> EmptyState(
-                title = "No transactions",
-                message = "Add your first transaction to get started",
-                actionLabel = "Add Transaction",
+                title = stringResource(R.string.transaction_empty_title),
+                message = stringResource(R.string.transaction_empty_message),
+                actionLabel = stringResource(R.string.home_add_transaction),
                 onAction = { onNavigateToAddEdit(null) },
                 modifier = Modifier
                     .fillMaxSize()
@@ -235,6 +245,7 @@ private fun DateGroupHeader(date: LocalDate) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface)
             .padding(horizontal = 16.dp, vertical = 6.dp),
     ) {
         Row(

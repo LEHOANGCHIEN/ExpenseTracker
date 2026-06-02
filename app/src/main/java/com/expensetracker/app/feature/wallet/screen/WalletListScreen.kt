@@ -26,10 +26,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.expensetracker.app.R
 import com.expensetracker.app.core.designsystem.component.EmptyState
 import com.expensetracker.app.core.designsystem.component.ShimmerBox
 import com.expensetracker.app.core.util.CurrencyFormatter
@@ -49,10 +51,10 @@ fun WalletListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Wallets") },
+                title = { Text(stringResource(R.string.nav_wallets)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back))
                     }
                 },
             )
@@ -62,16 +64,16 @@ fun WalletListScreen(
                 onClick = onNavigateToAddWallet,
                 containerColor = MaterialTheme.colorScheme.primary,
             ) {
-                Icon(Icons.Default.Add, "Add Wallet")
+                Icon(Icons.Default.Add, stringResource(R.string.wallet_add))
             }
         },
     ) { padding ->
         when {
             state.isLoading -> WalletShimmer(Modifier.padding(padding))
             state.wallets.isEmpty() -> EmptyState(
-                title = "No wallets yet",
-                message = "Add a wallet to start tracking your money",
-                actionLabel = "Add Wallet",
+                title = stringResource(R.string.wallet_empty_title_alt),
+                message = stringResource(R.string.wallet_empty_message_alt),
+                actionLabel = stringResource(R.string.wallet_add),
                 onAction = onNavigateToAddWallet,
                 modifier = Modifier.fillMaxSize().padding(padding),
             )
@@ -115,7 +117,7 @@ private fun TotalBalanceCard(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "Total Balance",
+                text = stringResource(R.string.wallet_total_balance),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
             )

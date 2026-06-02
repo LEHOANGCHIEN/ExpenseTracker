@@ -67,12 +67,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.expensetracker.app.R
 import coil3.compose.AsyncImage
 import com.expensetracker.app.core.designsystem.component.ShimmerBox
 import com.expensetracker.app.core.designsystem.theme.ExpenseRed
@@ -119,11 +121,11 @@ fun AddEditTransactionScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(if (state.isEditing) "Edit Transaction" else "Add Transaction")
+                    Text(if (state.isEditing) stringResource(R.string.transaction_edit_title) else stringResource(R.string.transaction_add_title))
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
                 actions = {
@@ -131,7 +133,7 @@ fun AddEditTransactionScreen(
                         IconButton(onClick = { viewModel.onEvent(AddEditUiEvent.DeleteRequested) }) {
                             Icon(
                                 Icons.Default.Delete,
-                                contentDescription = "Delete",
+                                contentDescription = stringResource(R.string.action_delete),
                                 tint = MaterialTheme.colorScheme.error,
                             )
                         }
@@ -146,17 +148,18 @@ fun AddEditTransactionScreen(
                 .fillMaxSize()
                 .padding(padding),
         ) {
-            // ---- Amount section (fixed) ----
+            // ---- Amount + type entry section (fixed) ----
             AmountSection(
                 expression = state.amountExpression,
                 resolvedAmount = state.resolvedAmount,
                 type = state.type,
                 currency = state.currency,
                 onKeyPress = { viewModel.onEvent(AddEditUiEvent.AmountKeyPressed(it)) },
+                onTypeChange = { viewModel.onEvent(AddEditUiEvent.TypeChanged(it)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
             )
 
             // ---- Form fields (scrollable) ----
@@ -164,15 +167,9 @@ fun AddEditTransactionScreen(
                 modifier = Modifier
                     .weight(1f)
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                // Type toggle
-                TypeSegmentedButton(
-                    selected = state.type,
-                    onChange = { viewModel.onEvent(AddEditUiEvent.TypeChanged(it)) },
-                )
-
                 // Category row
                 CategoryRow(
                     categories = state.filteredCategories,
@@ -187,7 +184,7 @@ fun AddEditTransactionScreen(
                     if (suggestedCat != null) {
                         AssistChip(
                             onClick = { viewModel.onEvent(AddEditUiEvent.CategorySelected(suggestedCat.id)) },
-                            label = { Text("✨ Suggested: ${suggestedCat.name}") },
+                            label = { Text(stringResource(R.string.transaction_ai_suggested, suggestedCat.name)) },
                             modifier = Modifier.padding(top = 4.dp),
                         )
                     }
@@ -200,8 +197,8 @@ fun AddEditTransactionScreen(
                 OutlinedTextField(
                     value = state.note,
                     onValueChange = { viewModel.onEvent(AddEditUiEvent.NoteChanged(it)) },
-                    label = { Text("Note") },
-                    placeholder = { Text("What was this for?") },
+                    label = { Text(stringResource(R.string.transaction_note_label)) },
+                    placeholder = { Text(stringResource(R.string.transaction_note_hint)) },
                     maxLines = 3,
                     modifier = Modifier.fillMaxWidth(),
                     supportingText = { Text("${state.note.length}/200") },
@@ -226,7 +223,7 @@ fun AddEditTransactionScreen(
                 // Recurring notice
                 if (state.isRecurringChild) {
                     Text(
-                        text = "ℹ️ This is part of a recurring schedule. Editing only affects this occurrence.",
+                        text = stringResource(R.string.transaction_recurring_notice),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier
@@ -250,7 +247,7 @@ fun AddEditTransactionScreen(
                         contentDescription = null,
                     )
                     Spacer(Modifier.width(4.dp))
-                    Text("Advanced options")
+                    Text(stringResource(R.string.transaction_advanced_options))
                 }
                 AnimatedVisibility(visible = state.showAdvanced) {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -258,12 +255,12 @@ fun AddEditTransactionScreen(
                             onClick = { viewModel.onEvent(AddEditUiEvent.ShowSplitDialog) },
                             modifier = Modifier.fillMaxWidth(),
                         ) {
-                            Text("Split Transaction")
+                            Text(stringResource(R.string.transaction_split_action))
                             Icon(Icons.Default.ChevronRight, null)
                         }
                         if (state.isSplitEnabled) {
                             Text(
-                                text = "Split into ${state.splitParts.size} parts",
+                                text = stringResource(R.string.transaction_split_parts, state.splitParts.size),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.primary,
                             )
@@ -287,7 +284,7 @@ fun AddEditTransactionScreen(
                     Spacer(Modifier.width(8.dp))
                 }
                 Text(
-                    text = if (state.isEditing) "Update" else "Save",
+                    text = if (state.isEditing) stringResource(R.string.action_update) else stringResource(R.string.action_save),
                     style = MaterialTheme.typography.titleSmall,
                 )
             }
@@ -326,18 +323,18 @@ fun AddEditTransactionScreen(
     if (state.showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { viewModel.onEvent(AddEditUiEvent.DeleteDismissed) },
-            title = { Text("Delete Transaction") },
-            text = { Text("Are you sure you want to delete this transaction?") },
+            title = { Text(stringResource(R.string.transaction_delete_title)) },
+            text = { Text(stringResource(R.string.transaction_delete_confirm)) },
             confirmButton = {
                 TextButton(
                     onClick = { viewModel.onEvent(AddEditUiEvent.DeleteConfirmed) },
                 ) {
-                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { viewModel.onEvent(AddEditUiEvent.DeleteDismissed) }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.action_cancel))
                 }
             },
         )
@@ -351,6 +348,7 @@ private fun AmountSection(
     type: TransactionType,
     currency: String,
     onKeyPress: (String) -> Unit,
+    onTypeChange: (TransactionType) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val displayColor = when (type) {
@@ -360,17 +358,15 @@ private fun AmountSection(
     }
     val expressionHasOp = expression.any { it in listOf('+', '-', '×', '÷') }
 
-    Column(modifier = modifier) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        TypeSegmentedButton(selected = type, onChange = onTypeChange)
         Text(
             text = if (expressionHasOp) expression else CurrencyFormatter.format(resolvedAmount, currency),
-            style = MaterialTheme.typography.displaySmall.copy(
+            style = MaterialTheme.typography.headlineLarge.copy(
                 fontWeight = FontWeight.Bold,
-                fontSize = 32.sp,
             ),
             color = displayColor,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp),
+            modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.End,
             maxLines = 1,
         )
@@ -383,7 +379,6 @@ private fun AmountSection(
                 textAlign = TextAlign.End,
             )
         }
-        Spacer(Modifier.height(8.dp))
         AmountKeypad(onKeyPress = onKeyPress)
     }
 }
@@ -419,7 +414,7 @@ private fun CategoryRow(
     val recentCategories = categories.take(6)
     Column {
         Text(
-            text = "Category",
+            text = stringResource(R.string.transaction_detail_category),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(bottom = 6.dp),
@@ -475,7 +470,7 @@ private fun CategoryRow(
                         Text("•••", fontSize = 14.sp)
                     }
                     Text(
-                        "More",
+                        stringResource(R.string.transaction_more_categories),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary,
                     )
@@ -502,12 +497,12 @@ private fun TagsSection(
             OutlinedTextField(
                 value = tagInput,
                 onValueChange = onInputChange,
-                label = { Text("Add tag") },
+                label = { Text(stringResource(R.string.transaction_add_tag)) },
                 singleLine = true,
                 modifier = Modifier.weight(1f),
             )
             TextButton(onClick = onAddTag, enabled = tagInput.isNotBlank()) {
-                Text("Add")
+                Text(stringResource(R.string.action_add))
             }
         }
         if (tags.isNotEmpty()) {
@@ -523,7 +518,7 @@ private fun TagsSection(
                         trailingIcon = {
                             Icon(
                                 Icons.Default.Close,
-                                contentDescription = "Remove tag",
+                                contentDescription = stringResource(R.string.transaction_tag_remove),
                                 modifier = Modifier
                                     .size(14.dp)
                                     .clickable { onRemoveTag(tag) },
@@ -549,7 +544,7 @@ private fun PhotoSection(
         ) {
             Icon(Icons.Default.AddPhotoAlternate, null, Modifier.size(18.dp))
             Spacer(Modifier.width(8.dp))
-            Text("Attach Photo")
+            Text(stringResource(R.string.transaction_attach_photo))
         }
     } else {
         Box(
@@ -560,7 +555,7 @@ private fun PhotoSection(
         ) {
             AsyncImage(
                 model = photoUri,
-                contentDescription = "Transaction photo",
+                contentDescription = stringResource(R.string.transaction_photo_label),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
             )
@@ -570,7 +565,7 @@ private fun PhotoSection(
             ) {
                 Icon(
                     Icons.Default.Close,
-                    contentDescription = "Remove photo",
+                    contentDescription = stringResource(R.string.transaction_photo_remove),
                     tint = Color.White,
                 )
             }

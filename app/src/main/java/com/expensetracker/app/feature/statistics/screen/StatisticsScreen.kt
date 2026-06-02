@@ -32,11 +32,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.expensetracker.app.R
 import com.expensetracker.app.core.designsystem.theme.ExpenseRed
 import com.expensetracker.app.core.designsystem.theme.IncomeGreen
 import com.expensetracker.app.core.util.CurrencyFormatter
@@ -134,7 +136,7 @@ private fun StatisticsContent(
         }
 
         item {
-            ChartSection(title = "Spending Trend") {
+            ChartSection(title = stringResource(R.string.statistics_spending_trend)) {
                 SpendingTrendChart(
                     dailyExpense = state.dailyExpense,
                     startDate = state.startDate,
@@ -145,7 +147,7 @@ private fun StatisticsContent(
         }
 
         item {
-            ChartSection(title = "Income vs Expense") {
+            ChartSection(title = stringResource(R.string.statistics_income_vs_expense)) {
                 IncomeVsExpenseBarChart(
                     dailyIncome = state.dailyIncome,
                     dailyExpense = state.dailyExpense,
@@ -166,7 +168,7 @@ private fun StatisticsContent(
 
         if (showHeatmap) {
             item {
-                ChartSection(title = "Daily Spending Heatmap") {
+                ChartSection(title = stringResource(R.string.statistics_daily_heatmap)) {
                     DailySpendHeatmap(
                         dailyExpense = state.dailyExpense,
                         startDate = state.startDate,
@@ -200,7 +202,7 @@ private fun StatisticsContent(
                     )
                     Spacer(Modifier.padding(start = 8.dp))
                 }
-                Text(if (state.isGeneratingInsights) "Generating insights…" else "Refresh insights ✨")
+                Text(if (state.isGeneratingInsights) stringResource(R.string.statistics_generating_insights) else stringResource(R.string.statistics_refresh_insights))
             }
         }
     }
@@ -223,12 +225,12 @@ private fun CustomDateRangeRow(
     ) {
         AssistChip(
             onClick = onStartClick,
-            label = { Text("From: ${startDate.format(fmt)}") },
+            label = { Text(stringResource(R.string.statistics_from, startDate.format(fmt))) },
         )
         Text("-", style = MaterialTheme.typography.bodyMedium)
         AssistChip(
             onClick = onEndClick,
-            label = { Text("To: ${endDate.format(fmt)}") },
+            label = { Text(stringResource(R.string.statistics_to, endDate.format(fmt))) },
         )
     }
 }
@@ -241,7 +243,7 @@ private fun SummaryCard(
     Card(modifier = modifier) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = "Summary",
+                text = stringResource(R.string.statistics_summary),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
             )
@@ -251,21 +253,21 @@ private fun SummaryCard(
                 horizontalArrangement = Arrangement.SpaceEvenly,
             ) {
                 SummaryItem(
-                    label = "Income",
+                    label = stringResource(R.string.statistics_income),
                     amount = state.totalIncome,
                     currency = state.currency,
                     color = IncomeGreen,
                     changePct = state.incomeChangePct,
                 )
                 SummaryItem(
-                    label = "Expense",
+                    label = stringResource(R.string.statistics_expense),
                     amount = state.totalExpense,
                     currency = state.currency,
                     color = ExpenseRed,
                     changePct = state.expenseChangePct,
                 )
                 SummaryItem(
-                    label = "Net",
+                    label = stringResource(R.string.statistics_net),
                     amount = state.totalNet,
                     currency = state.currency,
                     color = if (state.totalNet >= 0) IncomeGreen else ExpenseRed,
@@ -348,7 +350,7 @@ private fun CategoryBreakdownSection(
             .padding(horizontal = 16.dp, vertical = 8.dp),
     ) {
         Text(
-            text = "By Category",
+            text = stringResource(R.string.statistics_by_category),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(bottom = 8.dp),
@@ -356,7 +358,7 @@ private fun CategoryBreakdownSection(
 
         if (categories.isEmpty()) {
             Text(
-                text = "No expense data",
+                text = stringResource(R.string.statistics_no_expense_data),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(vertical = 8.dp),
@@ -389,7 +391,7 @@ private fun TopNotesSection(notes: List<Pair<String, Int>>) {
             .padding(horizontal = 16.dp, vertical = 8.dp),
     ) {
         Text(
-            text = "Frequent Notes",
+            text = stringResource(R.string.statistics_frequent_notes),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(bottom = 8.dp),
@@ -410,7 +412,7 @@ private fun TopNotesSection(notes: List<Pair<String, Int>>) {
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
-                    text = "$count times",
+                    text = stringResource(R.string.statistics_times, count),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -443,11 +445,11 @@ private fun StatDatePickerDialog(
                     onDateSelected(date)
                 }
             }) {
-                Text("OK")
+                Text(stringResource(R.string.action_ok))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
         },
     ) {
         DatePicker(state = datePickerState)

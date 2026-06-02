@@ -37,11 +37,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.expensetracker.app.R
 import com.expensetracker.app.core.util.DateUtils
 import com.expensetracker.app.domain.model.BudgetPeriod
 import com.expensetracker.app.feature.budget.AddEditBudgetEvent
@@ -64,10 +66,10 @@ fun AddEditBudgetScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (state.isEditing) "Edit Budget" else "New Budget") },
+                title = { Text(if (state.isEditing) stringResource(R.string.budget_edit_title) else stringResource(R.string.budget_new_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back))
                     }
                 },
             )
@@ -96,7 +98,7 @@ fun AddEditBudgetScreen(
             OutlinedTextField(
                 value = state.amountText,
                 onValueChange = { viewModel.onEvent(AddEditBudgetEvent.AmountChanged(it)) },
-                label = { Text("Budget amount") },
+                label = { Text(stringResource(R.string.budget_amount)) },
                 placeholder = { Text("0") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 singleLine = true,
@@ -112,7 +114,7 @@ fun AddEditBudgetScreen(
             // Date display (auto or manual for CUSTOM)
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    text = "Period",
+                    text = stringResource(R.string.budget_period_label),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -125,14 +127,15 @@ fun AddEditBudgetScreen(
                             onClick = { viewModel.onEvent(AddEditBudgetEvent.ShowStartDatePicker) },
                             modifier = Modifier.weight(1f),
                         ) {
-                            Text("Start: ${DateUtils.formatRelative(state.startDate)}")
+                            Text(stringResource(R.string.budget_custom_start, DateUtils.formatRelative(state.startDate)))
                         }
                         TextButton(
                             onClick = { viewModel.onEvent(AddEditBudgetEvent.ShowEndDatePicker) },
                             modifier = Modifier.weight(1f),
                         ) {
                             Text(
-                                "End: ${state.endDate?.let { DateUtils.formatRelative(it) } ?: "Select"}"
+                                state.endDate?.let { stringResource(R.string.budget_custom_end, DateUtils.formatRelative(it)) }
+                                    ?: stringResource(R.string.budget_custom_end_select)
                             )
                         }
                     }
@@ -153,7 +156,7 @@ fun AddEditBudgetScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(
-                        text = "Alert threshold",
+                        text = stringResource(R.string.budget_alert_threshold),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -171,7 +174,7 @@ fun AddEditBudgetScreen(
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Text(
-                    text = "Notify me when spending reaches this %",
+                    text = stringResource(R.string.budget_alert_hint),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -193,7 +196,7 @@ fun AddEditBudgetScreen(
                     )
                     Spacer(Modifier.width(8.dp))
                 }
-                Text(if (state.isEditing) "Update" else "Save Budget")
+                Text(if (state.isEditing) stringResource(R.string.action_update) else stringResource(R.string.budget_save))
             }
 
             state.error?.let { err ->
@@ -236,7 +239,7 @@ private fun CategoryDropdown(
 ) {
     Column {
         Text(
-            text = "Category",
+            text = stringResource(R.string.category_label),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(bottom = 6.dp),
@@ -260,7 +263,7 @@ private fun CategoryDropdown(
                 onDismissRequest = onDismiss,
             ) {
                 DropdownMenuItem(
-                    text = { Text("Overall (all expenses)") },
+                    text = { Text(stringResource(R.string.category_overall)) },
                     onClick = { onSelect(null) },
                 )
                 categories.forEach { cat ->
@@ -285,7 +288,7 @@ private fun PeriodSelector(
     val options = BudgetPeriod.entries
     Column {
         Text(
-            text = "Period",
+            text = stringResource(R.string.budget_period_label),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(bottom = 6.dp),

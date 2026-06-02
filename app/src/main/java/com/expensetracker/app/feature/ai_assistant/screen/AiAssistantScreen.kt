@@ -35,11 +35,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.expensetracker.app.R
 import com.expensetracker.app.feature.ai_assistant.AiAssistantViewModel
 import com.expensetracker.app.feature.ai_assistant.screen.component.ChatBubble
 import com.expensetracker.app.feature.ai_assistant.screen.component.ChatInput
@@ -73,16 +75,16 @@ fun AiAssistantScreen(
     if (showClearDialog) {
         AlertDialog(
             onDismissRequest = { showClearDialog = false },
-            title = { Text("Clear history?") },
-            text = { Text("All messages in this session will be deleted.") },
+            title = { Text(stringResource(R.string.ai_clear_dialog_title)) },
+            text = { Text(stringResource(R.string.ai_clear_dialog_message)) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.clearHistory()
                     showClearDialog = false
-                }) { Text("Clear") }
+                }) { Text(stringResource(R.string.action_clear)) }
             },
             dismissButton = {
-                TextButton(onClick = { showClearDialog = false }) { Text("Cancel") }
+                TextButton(onClick = { showClearDialog = false }) { Text(stringResource(R.string.action_cancel)) }
             },
         )
     }
@@ -90,18 +92,18 @@ fun AiAssistantScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("AI Assistant ✨") },
+                title = { Text(stringResource(R.string.ai_title)) },
                 actions = {
                     IconButton(onClick = viewModel::newChat) {
                         Icon(
                             imageVector = Icons.Default.AddComment,
-                            contentDescription = "New chat",
+                            contentDescription = stringResource(R.string.ai_new_chat),
                         )
                     }
                     IconButton(onClick = { showClearDialog = true }) {
                         Icon(
                             imageVector = Icons.Default.DeleteSweep,
-                            contentDescription = "Clear history",
+                            contentDescription = stringResource(R.string.ai_clear_history),
                         )
                     }
                 },
@@ -182,14 +184,14 @@ private fun EmptyState(
             tint = MaterialTheme.colorScheme.primary,
         )
         Text(
-            text = "AI Financial Assistant",
+            text = stringResource(R.string.ai_financial_assistant),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(8.dp))
         Text(
-            text = "Ask me anything about your finances.\nI use your actual data to give you personalized advice.",
+            text = stringResource(R.string.ai_empty_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,

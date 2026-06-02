@@ -820,7 +820,7 @@ data class AddEditTransaction(
 ### Prerequisites
 
 - **Android Studio** Ladybug (2024.x) or newer
-- **JDK 11** or newer
+- **JDK 17** or newer — AGP 9.x and Gradle 9.x require JDK 17 to run builds. The `compileOptions { sourceCompatibility = JavaVersion.VERSION_11 }` in `app/build.gradle.kts` sets the bytecode *target*, not the toolchain version.
 - **Android device or emulator** running Android 8.0 (API 26) or higher
 - **Gemini API key** (free tier available at [Google AI Studio](https://aistudio.google.com)) — required only for AI features
 
@@ -875,11 +875,15 @@ Output: `app/build/outputs/apk/debug/app-debug.apk`
 
 ### Run Tests
 
+> **Note:** No application-specific tests have been written. The only test files present are the two Android Studio boilerplate stubs generated at project creation — `ExampleUnitTest` (`addition_isCorrect`) and `ExampleInstrumentedTest` (`useAppContext`). Writing a proper test suite is listed as a future improvement.
+
+The commands below will execute those stubs successfully but do not verify any app logic:
+
 ```bash
-# Unit tests
+# Unit tests (runs ExampleUnitTest only)
 ./gradlew test
 
-# Instrumented tests (requires connected device)
+# Instrumented tests (requires connected device — runs ExampleInstrumentedTest only)
 ./gradlew connectedAndroidTest
 ```
 
@@ -897,8 +901,8 @@ Output: `app/build/outputs/apk/debug/app-debug.apk`
 
 ### Known Build Notes
 
-- The project uses `android.disallowKotlinSourceSets=false` in `gradle.properties` — this is intentional for KSP compatibility with the current AGP version (see project memory).
-- `kotlin.android` plugin is **not** applied to the root; only `com.android.application` and `org.jetbrains.kotlin.android` are used in the app module.
+- The project uses `android.disallowKotlinSourceSets=false` in `gradle.properties` — this is intentional for KSP compatibility with the current AGP version.
+- `org.jetbrains.kotlin.android` is **not applied anywhere**. AGP 9.x has built-in Kotlin support, so that plugin is obsolete and replaced by the dedicated `org.jetbrains.kotlin.plugin.compose` and `org.jetbrains.kotlin.plugin.serialization` plugins. The five plugins actually applied in `app/build.gradle.kts` are: `com.android.application`, `org.jetbrains.kotlin.plugin.compose`, `org.jetbrains.kotlin.plugin.serialization`, `com.google.devtools.ksp`, and `com.google.dagger.hilt.android`.
 - Room schema files are exported to `app/schemas/` — include this directory in version control to track database migrations.
 
 ---

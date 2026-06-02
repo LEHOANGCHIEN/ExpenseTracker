@@ -25,7 +25,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
@@ -36,12 +35,10 @@ import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -56,7 +53,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -84,17 +80,9 @@ import com.expensetracker.app.domain.model.TransactionType
 import com.expensetracker.app.navigation.AddEditTransaction
 import com.expensetracker.app.navigation.AiAssistant
 import com.expensetracker.app.navigation.AppNavHost
-import com.expensetracker.app.navigation.Budgets
-import com.expensetracker.app.navigation.Categories
 import com.expensetracker.app.navigation.Home
-import com.expensetracker.app.navigation.Onboarding
-import com.expensetracker.app.navigation.ReceiptScanner
-import com.expensetracker.app.navigation.Recurring
-import com.expensetracker.app.navigation.Settings
 import com.expensetracker.app.navigation.Statistics
-import com.expensetracker.app.navigation.TransactionDetail
 import com.expensetracker.app.navigation.TransactionList
-import com.expensetracker.app.navigation.WalletManagement
 import java.time.format.DateTimeFormatter
 import androidx.compose.foundation.layout.Column
 
@@ -109,20 +97,7 @@ fun AppShell(startDestination: Any = Home) {
 
     val showBottomBar = currentDest.isTabDestination()
 
-    // AiAssistant and TransactionList manage their own top bars
-    val showGlobalTopBar = currentDest?.hasRoute(AiAssistant::class) != true &&
-        currentDest?.hasRoute(TransactionList::class) != true
-
     Scaffold(
-        topBar = {
-            if (showGlobalTopBar) {
-                AppTopBar(
-                    currentDest = currentDest,
-                    onNavigateUp = { navController.navigateUp() },
-                    onNavigateToSettings = { navController.navigate(Settings) },
-                )
-            }
-        },
         bottomBar = {
             AnimatedVisibility(
                 visible = showBottomBar,
@@ -149,79 +124,6 @@ fun AppShell(startDestination: Any = Home) {
             onDismiss = { showQuickAdd = false },
             navController = navController,
         )
-    }
-}
-
-// ---- Top App Bar ----
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun AppTopBar(
-    currentDest: NavDestination?,
-    onNavigateUp: () -> Unit,
-    onNavigateToSettings: () -> Unit,
-) {
-    val (title, isTopLevel) = topBarInfo(currentDest)
-
-    CenterAlignedTopAppBar(
-        title = { Text(text = title) },
-        navigationIcon = {
-            if (!isTopLevel) {
-                IconButton(onClick = onNavigateUp) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.action_back),
-                    )
-                }
-            }
-        },
-        actions = {
-            if (isTopLevel) {
-                IconButton(onClick = onNavigateToSettings) {
-                    Icon(
-                        imageVector = Icons.Outlined.Settings,
-                        contentDescription = stringResource(R.string.nav_settings),
-                    )
-                }
-            }
-        },
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-        ),
-    )
-}
-
-@Composable
-private fun topBarInfo(dest: NavDestination?): Pair<String, Boolean> {
-    val appName = stringResource(R.string.app_name)
-    val navTransactions = stringResource(R.string.nav_transactions)
-    val navStatistics = stringResource(R.string.nav_statistics)
-    val aiTitle = stringResource(R.string.ai_title)
-    val navAddTransaction = stringResource(R.string.nav_add_transaction)
-    val navTransactionDetail = stringResource(R.string.nav_transaction_detail)
-    val navCategories = stringResource(R.string.nav_categories)
-    val navBudgets = stringResource(R.string.nav_budgets)
-    val navRecurring = stringResource(R.string.nav_recurring)
-    val ocrTitle = stringResource(R.string.ocr_title)
-    val navWallets = stringResource(R.string.nav_wallets)
-    val navSettings = stringResource(R.string.nav_settings)
-    val navGetStarted = stringResource(R.string.nav_get_started)
-
-    return when {
-        dest?.hasRoute(Home::class) == true -> appName to true
-        dest?.hasRoute(TransactionList::class) == true -> navTransactions to true
-        dest?.hasRoute(Statistics::class) == true -> navStatistics to true
-        dest?.hasRoute(AiAssistant::class) == true -> aiTitle to true
-        dest?.hasRoute(AddEditTransaction::class) == true -> navAddTransaction to false
-        dest?.hasRoute(TransactionDetail::class) == true -> navTransactionDetail to false
-        dest?.hasRoute(Categories::class) == true -> navCategories to false
-        dest?.hasRoute(Budgets::class) == true -> navBudgets to false
-        dest?.hasRoute(Recurring::class) == true -> navRecurring to false
-        dest?.hasRoute(ReceiptScanner::class) == true -> ocrTitle to false
-        dest?.hasRoute(WalletManagement::class) == true -> navWallets to false
-        dest?.hasRoute(Settings::class) == true -> navSettings to false
-        dest?.hasRoute(Onboarding::class) == true -> navGetStarted to false
-        else -> appName to true
     }
 }
 

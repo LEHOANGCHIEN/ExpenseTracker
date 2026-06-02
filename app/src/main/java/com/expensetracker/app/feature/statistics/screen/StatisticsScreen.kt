@@ -24,8 +24,10 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -58,6 +60,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StatisticsScreen(
     onNavigateToTransactions: () -> Unit = {},
@@ -65,18 +68,27 @@ fun StatisticsScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    if (state.isLoading) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
+    Scaffold(
+        topBar = {
+            TopAppBar(title = { Text(stringResource(R.string.nav_statistics)) })
+        },
+    ) { paddingValues ->
+        if (state.isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize().padding(paddingValues),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator()
+            }
+        } else {
+            StatisticsContent(
+                state = state,
+                onEvent = viewModel::onEvent,
+                onNavigateToTransactions = onNavigateToTransactions,
+                modifier = Modifier.padding(paddingValues),
+            )
         }
-        return
     }
-
-    StatisticsContent(
-        state = state,
-        onEvent = viewModel::onEvent,
-        onNavigateToTransactions = onNavigateToTransactions,
-    )
 
     if (state.showCustomStartPicker) {
         StatDatePickerDialog(
@@ -100,11 +112,12 @@ private fun StatisticsContent(
     state: StatisticsUiState,
     onEvent: (StatisticsEvent) -> Unit,
     onNavigateToTransactions: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val showHeatmap = state.period == StatPeriod.THIS_MONTH || state.period == StatPeriod.LAST_MONTH
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(bottom = 24.dp),
     ) {
         item {

@@ -14,15 +14,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,6 +35,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import com.expensetracker.app.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -53,6 +59,7 @@ import java.time.format.DateTimeFormatter
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ReceiptScannerScreen(
+    onNavigateBack: () -> Unit = {},
     onNavigateToAddTransaction: (amount: Double?, note: String?, categoryId: Long?) -> Unit = { _, _, _ -> },
     viewModel: ReceiptScannerViewModel = hiltViewModel(),
 ) {
@@ -68,6 +75,19 @@ fun ReceiptScannerScreen(
         uri?.let { viewModel.processImage(it, context) }
     }
 
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.ocr_title)) },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back))
+                    }
+                },
+            )
+        },
+    ) { paddingValues ->
+    Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
     when (val s = state) {
         is ReceiptScannerUiState.Camera -> {
             if (cameraPermission.status.isGranted) {
@@ -155,6 +175,8 @@ fun ReceiptScannerScreen(
             }
         }
     }
+    }   // Box
+    }   // Scaffold
 }
 
 @Composable

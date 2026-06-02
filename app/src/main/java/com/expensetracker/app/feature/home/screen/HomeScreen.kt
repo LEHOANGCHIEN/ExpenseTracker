@@ -28,13 +28,17 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
@@ -71,30 +75,44 @@ fun HomeScreen(
     onNavigateToAiAssistant: () -> Unit,
     onNavigateToReceiptScanner: () -> Unit,
     onNavigateToRecurring: () -> Unit,
+    onNavigateToSettings: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
-
-    if (uiState.isLoading) {
-        HomeLoadingShimmer()
-        return
-    }
 
     val isEmpty = uiState.recentTransactions.isEmpty() &&
         uiState.monthIncome == 0.0 &&
         uiState.monthExpense == 0.0 &&
         uiState.totalBalance == 0.0
 
-    PullToRefreshBox(
-        isRefreshing = isRefreshing,
-        onRefresh = { viewModel.onEvent(HomeEvent.RefreshInsights) },
-        modifier = Modifier.fillMaxSize(),
-    ) {
-        LazyColumn(
-            contentPadding = PaddingValues(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(0.dp),
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = { Text(stringResource(R.string.app_name)) },
+                actions = {
+                    IconButton(onClick = onNavigateToSettings) {
+                        Icon(Icons.Outlined.Settings, stringResource(R.string.nav_settings))
+                    }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                ),
+            )
+        },
+    ) { paddingValues ->
+        if (uiState.isLoading) {
+            HomeLoadingShimmer(Modifier.padding(paddingValues))
+        } else {
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = { viewModel.onEvent(HomeEvent.RefreshInsights) },
+            modifier = Modifier.fillMaxSize().padding(paddingValues),
         ) {
+            LazyColumn(
+                contentPadding = PaddingValues(bottom = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(0.dp),
+            ) {
             item {
                 HomeHeader(
                     selectedMonth = uiState.selectedMonth,
@@ -235,7 +253,9 @@ fun HomeScreen(
                 }
             }
         }
-    }
+        }   // PullToRefreshBox
+        }   // else
+    }       // Scaffold
 }
 
 @Composable
@@ -348,9 +368,9 @@ private fun QuickActionButton(
 }
 
 @Composable
-private fun HomeLoadingShimmer() {
+private fun HomeLoadingShimmer(modifier: Modifier = Modifier) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),

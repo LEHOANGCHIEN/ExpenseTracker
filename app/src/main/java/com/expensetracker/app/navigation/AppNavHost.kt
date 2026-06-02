@@ -58,6 +58,7 @@ fun AppNavHost(
                 onNavigateToAiAssistant = { navController.navigate(AiAssistant) },
                 onNavigateToReceiptScanner = { navController.navigate(ReceiptScanner) },
                 onNavigateToRecurring = { navController.navigate(Recurring) },
+                onNavigateToSettings = { navController.navigate(Settings) },
             )
         }
         composable<TransactionList> {
@@ -128,6 +129,7 @@ fun AppNavHost(
         }
         composable<ReceiptScanner> {
             ReceiptScannerScreen(
+                onNavigateBack = { navController.navigateUp() },
                 onNavigateToAddTransaction = { amount, note, categoryId ->
                     navController.navigate(
                         AddEditTransaction(
@@ -155,6 +157,7 @@ fun AppNavHost(
         // ---- App-level screens ----
         composable<Settings> {
             SettingsScreen(
+                onNavigateBack = { navController.navigateUp() },
                 onNavigateToGeminiTest = { navController.navigate(GeminiTest) },
             )
         }

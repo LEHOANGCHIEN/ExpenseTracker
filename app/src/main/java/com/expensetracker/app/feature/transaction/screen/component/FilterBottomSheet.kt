@@ -29,9 +29,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.expensetracker.app.R
 import com.expensetracker.app.domain.model.Category
 import com.expensetracker.app.domain.model.TransactionType
 import com.expensetracker.app.feature.transaction.TransactionFilter
@@ -67,7 +69,7 @@ fun FilterBottomSheet(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
-                    text = "Filter Transactions",
+                    text = stringResource(R.string.filter_title),
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 )
                 TextButton(onClick = {
@@ -76,19 +78,17 @@ fun FilterBottomSheet(
                     minAmount = ""
                     maxAmount = ""
                 }) {
-                    Text("Clear All")
+                    Text(stringResource(R.string.filter_clear_all))
                 }
             }
 
             // Type filter
             Text(
-                text = "Type",
+                text = stringResource(R.string.filter_type),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 TransactionType.entries.forEach { type ->
                     FilterChip(
                         selected = type in selectedTypes,
@@ -96,7 +96,15 @@ fun FilterBottomSheet(
                             selectedTypes = if (type in selectedTypes)
                                 selectedTypes - type else selectedTypes + type
                         },
-                        label = { Text(type.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                        label = {
+                            Text(
+                                when (type) {
+                                    TransactionType.INCOME -> stringResource(R.string.transaction_type_income)
+                                    TransactionType.EXPENSE -> stringResource(R.string.transaction_type_expense)
+                                    TransactionType.TRANSFER -> stringResource(R.string.transaction_type_transfer)
+                                },
+                            )
+                        },
                     )
                 }
             }
@@ -104,13 +112,11 @@ fun FilterBottomSheet(
             // Category filter
             if (categories.isNotEmpty()) {
                 Text(
-                    text = "Category",
+                    text = stringResource(R.string.category_label),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     categories.forEach { cat ->
                         FilterChip(
                             selected = cat.id in selectedCategoryIds,
@@ -131,7 +137,7 @@ fun FilterBottomSheet(
 
             // Amount range
             Text(
-                text = "Amount Range",
+                text = stringResource(R.string.filter_amount_range),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -142,7 +148,7 @@ fun FilterBottomSheet(
                 OutlinedTextField(
                     value = minAmount,
                     onValueChange = { minAmount = it },
-                    label = { Text("Min") },
+                    label = { Text(stringResource(R.string.filter_min)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     singleLine = true,
                     modifier = Modifier.weight(1f),
@@ -150,7 +156,7 @@ fun FilterBottomSheet(
                 OutlinedTextField(
                     value = maxAmount,
                     onValueChange = { maxAmount = it },
-                    label = { Text("Max") },
+                    label = { Text(stringResource(R.string.filter_max)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     singleLine = true,
                     modifier = Modifier.weight(1f),
@@ -163,7 +169,7 @@ fun FilterBottomSheet(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 OutlinedButton(onClick = onDismiss, modifier = Modifier.weight(1f)) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.action_cancel))
                 }
                 Button(
                     onClick = {
@@ -173,12 +179,12 @@ fun FilterBottomSheet(
                                 types = selectedTypes,
                                 minAmount = minAmount.toDoubleOrNull(),
                                 maxAmount = maxAmount.toDoubleOrNull(),
-                            )
+                            ),
                         )
                     },
                     modifier = Modifier.weight(1f),
                 ) {
-                    Text("Apply")
+                    Text(stringResource(R.string.filter_apply))
                 }
             }
             Spacer(Modifier.height(8.dp))

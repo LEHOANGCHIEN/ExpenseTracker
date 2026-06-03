@@ -284,4 +284,84 @@
     <!-- Errors -->
     <string name="error_generic">Something went wrong. Please try again.</string>
     <string name="error_network">No internet connection</string>
+
+    <!-- Auth screens -->
+    <string name="auth_sign_in_title">Sign In</string>
+    <string name="auth_email">Email</string>
+    <string name="auth_password">Password</string>
+    <string name="auth_password_show">Show password</string>
+    <string name="auth_password_hide">Hide password</string>
+    <string name="auth_forgot_password">Forgot password?</string>
+    <string name="auth_sign_in_button">Sign In</string>
+    <string name="auth_no_account_register">Don\'t have an account? Register</string>
+    <string name="auth_create_account_title">Create Account</string>
+    <string name="auth_create_account_button">Create Account</string>
+    <string name="auth_confirm_password">Confirm Password</string>
+    <string name="auth_passwords_no_match">Passwords do not match</string>
+    <string name="auth_have_account_sign_in">Already have an account? Sign In</string>
+    <string name="auth_reset_password_title">Reset Password</string>
+    <string name="auth_forgot_password_heading">Forgot your password?</string>
+    <string name="auth_forgot_password_hint">Enter the email address associated with your account. We\'ll send you a link to reset your password.</string>
+    <string name="auth_send_reset_link">Send Reset Link</string>
+    <string name="auth_back_to_sign_in">Back to Sign In</string>
+    <string name="auth_check_inbox_title">Check your inbox</string>
+    <string name="auth_reset_link_sent">We\'ve sent a password reset link to</string>
+    <string name="auth_reset_link_hint">Follow the link in the email to reset your password. If you don\'t see it, check your spam folder.</string>
+
+    <!-- Auth errors -->
+    <string name="auth_error_weak_password">Password is too weak</string>
+    <string name="auth_error_email_in_use">An account already exists with this email</string>
+    <string name="auth_error_wrong_password">Wrong password</string>
+    <string name="auth_error_invalid_email">Invalid email address</string>
+    <string name="auth_error_invalid_credential">Invalid email or password</string>
+    <string name="auth_error_user_not_found">No account found with this email</string>
+    <string name="auth_error_user_disabled">This account has been disabled</string>
+    <string name="auth_error_network">Network error. Check your connection</string>
+    <string name="auth_error_unknown">Authentication error</string>
+    <string name="auth_error_email_required">Email is required</string>
+    <string name="auth_error_invalid_email_format">Enter a valid email address</string>
+    <string name="auth_error_password_too_short">Password must be at least 6 characters</string>
+
+    <!-- Settings — Account section -->
+    <string name="settings_section_account">Account</string>
+    <string name="settings_signed_in_as">Signed in as</string>
+    <string name="settings_sign_out">Sign Out</string>
+
+    <!-- Settings — Theme options -->
+    <string name="settings_theme_system">System</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+
+    <!-- Home — additional -->
+    <string name="home_net">Net</string>
+    <string name="home_top_categories">Top Categories</string>
+    <string name="home_no_expenses_month">No expenses this month</string>
+
+    <!-- Date labels -->
+    <string name="date_today">Today</string>
+    <string name="date_yesterday">Yesterday</string>
+    <string name="date_tomorrow">Tomorrow</string>
+
+    <!-- Statistics — period chips -->
+    <string name="statistics_period_this_week">This Week</string>
+    <string name="statistics_period_this_month">This Month</string>
+    <string name="statistics_period_last_month">Last Month</string>
+    <string name="statistics_period_this_year">This Year</string>
+    <string name="statistics_period_custom">Custom</string>
+    <string name="statistics_no_spending_data">No spending data</string>
+    <string name="statistics_no_data_period">No data for period</string>
+
+    <!-- Transaction types (shared across screens) -->
+    <string name="transaction_type_income">Income</string>
+    <string name="transaction_type_expense">Expense</string>
+    <string name="transaction_type_transfer">Transfer</string>
+
+    <!-- Filter sheet -->
+    <string name="filter_title">Filter Transactions</string>
+    <string name="filter_clear_all">Clear All</string>
+    <string name="filter_type">Type</string>
+    <string name="filter_amount_range">Amount Range</string>
+    <string name="filter_min">Min</string>
+    <string name="filter_max">Max</string>
+    <string name="filter_apply">Apply</string>
 </resources>

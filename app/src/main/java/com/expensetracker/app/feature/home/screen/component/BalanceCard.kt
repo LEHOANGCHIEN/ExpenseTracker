@@ -19,6 +19,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import com.expensetracker.app.R
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -52,7 +54,7 @@ fun BalanceCard(
     ) {
         Column {
             Text(
-                text = "Total Balance",
+                text = stringResource(R.string.home_total_balance),
                 style = MaterialTheme.typography.labelMedium,
                 color = Color.White.copy(alpha = 0.75f),
             )
@@ -66,14 +68,14 @@ fun BalanceCard(
             Spacer(Modifier.height(20.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 BalanceSummaryChip(
-                    label = "Income",
+                    label = stringResource(R.string.home_income),
                     amount = monthIncome,
                     currency = currency,
                     icon = Icons.Default.ArrowUpward,
                     iconTint = IncomeGreen,
                 )
                 BalanceSummaryChip(
-                    label = "Expense",
+                    label = stringResource(R.string.home_expense),
                     amount = monthExpense,
                     currency = currency,
                     icon = Icons.Default.ArrowDownward,

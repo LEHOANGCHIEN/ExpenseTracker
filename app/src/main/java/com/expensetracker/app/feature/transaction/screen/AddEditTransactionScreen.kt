@@ -397,7 +397,13 @@ private fun TypeSegmentedButton(
                 onClick = { onChange(type) },
                 shape = SegmentedButtonDefaults.itemShape(index, options.size),
                 label = {
-                    Text(type.name.lowercase().replaceFirstChar { it.uppercase() })
+                    Text(
+                        when (type) {
+                            TransactionType.INCOME -> stringResource(R.string.transaction_type_income)
+                            TransactionType.EXPENSE -> stringResource(R.string.transaction_type_expense)
+                            TransactionType.TRANSFER -> stringResource(R.string.transaction_type_transfer)
+                        },
+                    )
                 },
             )
         }
@@ -580,6 +586,9 @@ private fun WalletAndDateRow(
     onEvent: (AddEditUiEvent) -> Unit,
 ) {
     val isTransfer = state.type == com.expensetracker.app.domain.model.TransactionType.TRANSFER
+    val todayLabel = stringResource(R.string.date_today)
+    val yesterdayLabel = stringResource(R.string.date_yesterday)
+    val tomorrowLabel = stringResource(R.string.date_tomorrow)
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         // From wallet + date
         Row(
@@ -595,7 +604,7 @@ private fun WalletAndDateRow(
             }
             AssistChip(
                 onClick = { onEvent(AddEditUiEvent.ShowDatePicker) },
-                label = { Text(DateUtils.formatRelative(state.date)) },
+                label = { Text(DateUtils.formatRelative(state.date, todayLabel = todayLabel, yesterdayLabel = yesterdayLabel, tomorrowLabel = tomorrowLabel)) },
                 leadingIcon = { Icon(Icons.Default.CalendarToday, null, Modifier.size(16.dp)) },
             )
         }

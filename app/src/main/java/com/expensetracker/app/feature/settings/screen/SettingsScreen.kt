@@ -146,10 +146,10 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState()),
         ) {
             // ---- Account ----
-            SettingsSection("Account") {
+            SettingsSection(stringResource(R.string.settings_section_account)) {
                 val email = viewModel.currentUserEmail
                 if (email != null) {
-                    SettingsInfoRow("Signed in as", email)
+                    SettingsInfoRow(stringResource(R.string.settings_signed_in_as), email)
                     Spacer(Modifier.height(12.dp))
                 }
                 OutlinedButton(
@@ -157,7 +157,7 @@ fun SettingsScreen(
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
                 ) {
-                    Text("Sign Out")
+                    Text(stringResource(R.string.settings_sign_out))
                 }
             }
 
@@ -236,7 +236,15 @@ fun SettingsScreen(
                         FilterChip(
                             selected = prefs.themeMode == mode,
                             onClick = { viewModel.setThemeMode(mode) },
-                            label = { Text(mode.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                            label = {
+                                Text(
+                                    when (mode) {
+                                        ThemeMode.SYSTEM -> stringResource(R.string.settings_theme_system)
+                                        ThemeMode.LIGHT -> stringResource(R.string.settings_theme_light)
+                                        ThemeMode.DARK -> stringResource(R.string.settings_theme_dark)
+                                    },
+                                )
+                            },
                         )
                     }
                 }

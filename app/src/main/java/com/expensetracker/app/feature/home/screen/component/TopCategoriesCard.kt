@@ -19,8 +19,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.expensetracker.app.R
 import com.expensetracker.app.core.designsystem.component.AppCard
 import com.expensetracker.app.core.designsystem.component.SectionHeader
 import com.expensetracker.app.core.util.CurrencyFormatter
@@ -33,11 +35,11 @@ fun TopCategoriesCard(
     modifier: Modifier = Modifier,
 ) {
     AppCard(modifier = modifier.fillMaxWidth()) {
-        SectionHeader(title = "Top Categories")
+        SectionHeader(title = stringResource(R.string.home_top_categories))
         Spacer(Modifier.height(12.dp))
         if (categories.isEmpty()) {
             Text(
-                text = "No expenses this month",
+                text = stringResource(R.string.home_no_expenses_month),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

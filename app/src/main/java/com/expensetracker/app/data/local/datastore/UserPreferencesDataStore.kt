@@ -49,7 +49,7 @@ class UserPreferencesDataStore @Inject constructor(
                 monthStartDay = prefs[Keys.MONTH_START_DAY] ?: 1,
                 dailyReminderEnabled = prefs[Keys.DAILY_REMINDER_ENABLED] ?: true,
                 budgetAlertsEnabled = prefs[Keys.BUDGET_ALERTS_ENABLED] ?: true,
-                language = prefs[Keys.LANGUAGE] ?: "en",
+                language = prefs[Keys.LANGUAGE] ?: "vi",
             )
         }
 

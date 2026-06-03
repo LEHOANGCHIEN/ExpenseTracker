@@ -17,7 +17,7 @@ object LocaleHelper {
     fun getLanguage(context: Context): String =
         context.applicationContext
             .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .getString(KEY_LANGUAGE, "en") ?: "en"
+            .getString(KEY_LANGUAGE, "vi") ?: "vi"
 
     fun applyLocale(context: Context): Context {
         val language = getLanguage(context)

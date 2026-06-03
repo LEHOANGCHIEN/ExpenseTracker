@@ -19,8 +19,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.expensetracker.app.R
 import com.expensetracker.app.core.designsystem.theme.ExpenseRed
 import com.expensetracker.app.core.designsystem.theme.IncomeGreen
 import com.expensetracker.app.core.util.CurrencyFormatter
@@ -70,6 +72,9 @@ private fun RecentTransactionItem(
     currency: String,
     onClick: () -> Unit,
 ) {
+    val todayLabel = stringResource(R.string.date_today)
+    val yesterdayLabel = stringResource(R.string.date_yesterday)
+    val tomorrowLabel = stringResource(R.string.date_tomorrow)
     val catColor = category?.color?.let { hex ->
         runCatching { Color(android.graphics.Color.parseColor(hex)) }.getOrNull()
     } ?: MaterialTheme.colorScheme.primary
@@ -122,7 +127,7 @@ private fun RecentTransactionItem(
                 color = amountColor,
             )
             Text(
-                text = DateUtils.formatRelative(transaction.date),
+                text = DateUtils.formatRelative(transaction.date, todayLabel = todayLabel, yesterdayLabel = yesterdayLabel, tomorrowLabel = tomorrowLabel),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

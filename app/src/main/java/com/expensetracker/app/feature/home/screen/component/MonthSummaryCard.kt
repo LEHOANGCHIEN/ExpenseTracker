@@ -15,8 +15,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.expensetracker.app.R
 import com.expensetracker.app.core.designsystem.component.AppCard
 import com.expensetracker.app.core.designsystem.theme.ExpenseRed
 import com.expensetracker.app.core.designsystem.theme.IncomeGreen
@@ -38,7 +40,7 @@ fun MonthSummaryCard(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             MonthSummaryItem(
-                label = "Income",
+                label = stringResource(R.string.home_income),
                 amount = monthIncome,
                 currency = currency,
                 color = IncomeGreen,
@@ -46,7 +48,7 @@ fun MonthSummaryCard(
             )
             VerticalDivider(modifier = Modifier.height(40.dp))
             MonthSummaryItem(
-                label = "Expense",
+                label = stringResource(R.string.home_expense),
                 amount = monthExpense,
                 currency = currency,
                 color = ExpenseRed,
@@ -54,7 +56,7 @@ fun MonthSummaryCard(
             )
             VerticalDivider(modifier = Modifier.height(40.dp))
             MonthSummaryItem(
-                label = "Net",
+                label = stringResource(R.string.home_net),
                 amount = abs(monthNet),
                 currency = currency,
                 color = if (monthNet >= 0) IncomeGreen else ExpenseRed,

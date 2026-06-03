@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -44,6 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.expensetracker.app.R
 import com.expensetracker.app.core.designsystem.component.AppPrimaryButton
 import com.expensetracker.app.feature.auth.viewmodel.AuthViewModel
 
@@ -61,6 +63,10 @@ fun RegisterScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
     var confirmPasswordError by remember { mutableStateOf<String?>(null) }
+
+    val passwordsNoMatch = stringResource(R.string.auth_passwords_no_match)
+    val showLabel = stringResource(R.string.auth_password_show)
+    val hideLabel = stringResource(R.string.auth_password_hide)
 
     Scaffold { innerPadding ->
         Column(
@@ -82,12 +88,12 @@ fun RegisterScreen(
             )
             Spacer(Modifier.height(12.dp))
             Text(
-                text = "Expense Tracker",
+                text = stringResource(R.string.app_name),
                 style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.primary,
             )
             Text(
-                text = "Take control of your finances",
+                text = stringResource(R.string.app_tagline),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -95,7 +101,7 @@ fun RegisterScreen(
             Spacer(Modifier.height(40.dp))
 
             Text(
-                text = "Create Account",
+                text = stringResource(R.string.auth_create_account_title),
                 style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold),
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -105,7 +111,7 @@ fun RegisterScreen(
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it; viewModel.clearError() },
-                label = { Text("Email") },
+                label = { Text(stringResource(R.string.auth_email)) },
                 leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
@@ -124,13 +130,13 @@ fun RegisterScreen(
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it; viewModel.clearError(); confirmPasswordError = null },
-                label = { Text("Password") },
+                label = { Text(stringResource(R.string.auth_password)) },
                 leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
                 trailingIcon = {
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
                         Icon(
                             imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                            contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                            contentDescription = if (passwordVisible) hideLabel else showLabel,
                         )
                     }
                 },
@@ -152,13 +158,13 @@ fun RegisterScreen(
             OutlinedTextField(
                 value = confirmPassword,
                 onValueChange = { confirmPassword = it; confirmPasswordError = null },
-                label = { Text("Confirm Password") },
+                label = { Text(stringResource(R.string.auth_confirm_password)) },
                 leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
                 trailingIcon = {
                     IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
                         Icon(
                             imageVector = if (confirmPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                            contentDescription = if (confirmPasswordVisible) "Hide password" else "Show password",
+                            contentDescription = if (confirmPasswordVisible) hideLabel else showLabel,
                         )
                     }
                 },
@@ -176,7 +182,7 @@ fun RegisterScreen(
                     onDone = {
                         focusManager.clearFocus()
                         if (password != confirmPassword) {
-                            confirmPasswordError = "Passwords do not match"
+                            confirmPasswordError = passwordsNoMatch
                         } else {
                             viewModel.signUp(email, password)
                         }
@@ -198,10 +204,10 @@ fun RegisterScreen(
             Spacer(Modifier.height(24.dp))
 
             AppPrimaryButton(
-                text = "Create Account",
+                text = stringResource(R.string.auth_create_account_button),
                 onClick = {
                     if (password != confirmPassword) {
-                        confirmPasswordError = "Passwords do not match"
+                        confirmPasswordError = passwordsNoMatch
                     } else {
                         viewModel.signUp(email, password)
                     }
@@ -214,7 +220,7 @@ fun RegisterScreen(
 
             TextButton(onClick = onNavigateToLogin) {
                 Text(
-                    text = "Already have an account? Sign In",
+                    text = stringResource(R.string.auth_have_account_sign_in),
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }

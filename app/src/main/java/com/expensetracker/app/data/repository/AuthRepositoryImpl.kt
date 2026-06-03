@@ -1,6 +1,7 @@
 package com.expensetracker.app.data.repository
 
 import com.expensetracker.app.data.bootstrap.UserBootstrapService
+import com.expensetracker.app.domain.model.AuthException
 import com.expensetracker.app.domain.model.AuthUser
 import com.expensetracker.app.domain.repository.AuthRepository
 import com.google.firebase.FirebaseNetworkException
@@ -37,23 +38,23 @@ class AuthRepositoryImpl @Inject constructor(
     override suspend fun signUp(email: String, password: String): Result<AuthUser> =
         try {
             val result = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
-            val user = result.user ?: return Result.failure(Exception("Sign-up failed"))
+            val user = result.user ?: return Result.failure(AuthException.Unknown())
             val authUser = user.toAuthUser()
             userBootstrapService.bootstrapIfNeeded(authUser.uid)
             Result.success(authUser)
         } catch (e: Exception) {
-            Result.failure(Exception(e.toAuthMessage()))
+            Result.failure(e.toAuthException())
         }
 
     override suspend fun signIn(email: String, password: String): Result<AuthUser> =
         try {
             val result = firebaseAuth.signInWithEmailAndPassword(email, password).await()
-            val user = result.user ?: return Result.failure(Exception("Sign-in failed"))
+            val user = result.user ?: return Result.failure(AuthException.Unknown())
             val authUser = user.toAuthUser()
             userBootstrapService.bootstrapIfNeeded(authUser.uid)
             Result.success(authUser)
         } catch (e: Exception) {
-            Result.failure(Exception(e.toAuthMessage()))
+            Result.failure(e.toAuthException())
         }
 
     override suspend fun signOut() {
@@ -65,26 +66,26 @@ class AuthRepositoryImpl @Inject constructor(
             firebaseAuth.sendPasswordResetEmail(email.trim()).await()
             Result.success(Unit)
         } catch (e: Exception) {
-            Result.failure(Exception(e.toAuthMessage()))
+            Result.failure(e.toAuthException())
         }
 }
 
 private fun FirebaseUser.toAuthUser() = AuthUser(uid = uid, email = email ?: "")
 
-private fun Exception.toAuthMessage(): String = when (this) {
-    is FirebaseAuthWeakPasswordException -> "Password is too weak"
-    is FirebaseAuthUserCollisionException -> "An account already exists with this email"
+private fun Exception.toAuthException(): AuthException = when (this) {
+    is AuthException -> this
+    is FirebaseAuthWeakPasswordException -> AuthException.WeakPassword()
+    is FirebaseAuthUserCollisionException -> AuthException.EmailAlreadyInUse()
     is FirebaseAuthInvalidCredentialsException -> when (errorCode) {
-        "ERROR_WRONG_PASSWORD" -> "Wrong password"
-        "ERROR_INVALID_EMAIL" -> "Invalid email address"
-        "ERROR_INVALID_CREDENTIAL" -> "Invalid email or password"
-        else -> "Invalid credentials"
+        "ERROR_WRONG_PASSWORD" -> AuthException.WrongPassword()
+        "ERROR_INVALID_EMAIL" -> AuthException.InvalidEmail()
+        else -> AuthException.InvalidCredential()
     }
     is FirebaseAuthInvalidUserException -> when (errorCode) {
-        "ERROR_USER_NOT_FOUND" -> "No account found with this email"
-        "ERROR_USER_DISABLED" -> "This account has been disabled"
-        else -> message ?: "Authentication error"
+        "ERROR_USER_NOT_FOUND" -> AuthException.UserNotFound()
+        "ERROR_USER_DISABLED" -> AuthException.UserDisabled()
+        else -> AuthException.Unknown(message ?: "")
     }
-    is FirebaseNetworkException -> "Network error. Check your connection"
-    else -> message ?: "Authentication error"
+    is FirebaseNetworkException -> AuthException.NetworkError()
+    else -> AuthException.Unknown(message ?: "")
 }

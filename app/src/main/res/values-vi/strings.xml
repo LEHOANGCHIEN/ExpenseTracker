@@ -284,4 +284,84 @@
     <!-- Errors -->
     <string name="error_generic">Đã xảy ra lỗi. Vui lòng thử lại.</string>
     <string name="error_network">Không có kết nối internet</string>
+
+    <!-- Auth screens -->
+    <string name="auth_sign_in_title">Đăng nhập</string>
+    <string name="auth_email">Email</string>
+    <string name="auth_password">Mật khẩu</string>
+    <string name="auth_password_show">Hiện mật khẩu</string>
+    <string name="auth_password_hide">Ẩn mật khẩu</string>
+    <string name="auth_forgot_password">Quên mật khẩu?</string>
+    <string name="auth_sign_in_button">Đăng nhập</string>
+    <string name="auth_no_account_register">Chưa có tài khoản? Đăng ký</string>
+    <string name="auth_create_account_title">Tạo tài khoản</string>
+    <string name="auth_create_account_button">Tạo tài khoản</string>
+    <string name="auth_confirm_password">Xác nhận mật khẩu</string>
+    <string name="auth_passwords_no_match">Mật khẩu không khớp</string>
+    <string name="auth_have_account_sign_in">Đã có tài khoản? Đăng nhập</string>
+    <string name="auth_reset_password_title">Đặt lại mật khẩu</string>
+    <string name="auth_forgot_password_heading">Quên mật khẩu?</string>
+    <string name="auth_forgot_password_hint">Nhập địa chỉ email liên kết với tài khoản của bạn. Chúng tôi sẽ gửi liên kết đặt lại mật khẩu.</string>
+    <string name="auth_send_reset_link">Gửi liên kết đặt lại</string>
+    <string name="auth_back_to_sign_in">Quay lại đăng nhập</string>
+    <string name="auth_check_inbox_title">Kiểm tra hộp thư</string>
+    <string name="auth_reset_link_sent">Chúng tôi đã gửi liên kết đặt lại mật khẩu đến</string>
+    <string name="auth_reset_link_hint">Nhấn vào liên kết trong email để đặt lại mật khẩu. Nếu không thấy, hãy kiểm tra thư rác.</string>
+
+    <!-- Auth errors -->
+    <string name="auth_error_weak_password">Mật khẩu quá yếu</string>
+    <string name="auth_error_email_in_use">Email này đã được đăng ký</string>
+    <string name="auth_error_wrong_password">Sai mật khẩu</string>
+    <string name="auth_error_invalid_email">Địa chỉ email không hợp lệ</string>
+    <string name="auth_error_invalid_credential">Email hoặc mật khẩu không đúng</string>
+    <string name="auth_error_user_not_found">Không tìm thấy tài khoản với email này</string>
+    <string name="auth_error_user_disabled">Tài khoản này đã bị vô hiệu hóa</string>
+    <string name="auth_error_network">Lỗi mạng. Kiểm tra kết nối của bạn</string>
+    <string name="auth_error_unknown">Lỗi xác thực</string>
+    <string name="auth_error_email_required">Email là bắt buộc</string>
+    <string name="auth_error_invalid_email_format">Nhập địa chỉ email hợp lệ</string>
+    <string name="auth_error_password_too_short">Mật khẩu phải có ít nhất 6 ký tự</string>
+
+    <!-- Settings — Account section -->
+    <string name="settings_section_account">Tài khoản</string>
+    <string name="settings_signed_in_as">Đang đăng nhập với</string>
+    <string name="settings_sign_out">Đăng xuất</string>
+
+    <!-- Settings — Theme options -->
+    <string name="settings_theme_system">Hệ thống</string>
+    <string name="settings_theme_light">Sáng</string>
+    <string name="settings_theme_dark">Tối</string>
+
+    <!-- Home — additional -->
+    <string name="home_net">Số dư ròng</string>
+    <string name="home_top_categories">Danh mục hàng đầu</string>
+    <string name="home_no_expenses_month">Chưa có chi tiêu trong tháng này</string>
+
+    <!-- Date labels -->
+    <string name="date_today">Hôm nay</string>
+    <string name="date_yesterday">Hôm qua</string>
+    <string name="date_tomorrow">Ngày mai</string>
+
+    <!-- Statistics — period chips -->
+    <string name="statistics_period_this_week">Tuần này</string>
+    <string name="statistics_period_this_month">Tháng này</string>
+    <string name="statistics_period_last_month">Tháng trước</string>
+    <string name="statistics_period_this_year">Năm nay</string>
+    <string name="statistics_period_custom">Tùy chọn</string>
+    <string name="statistics_no_spending_data">Không có dữ liệu chi tiêu</string>
+    <string name="statistics_no_data_period">Không có dữ liệu trong kỳ này</string>
+
+    <!-- Transaction types (shared across screens) -->
+    <string name="transaction_type_income">Thu nhập</string>
+    <string name="transaction_type_expense">Chi tiêu</string>
+    <string name="transaction_type_transfer">Chuyển khoản</string>
+
+    <!-- Filter sheet -->
+    <string name="filter_title">Lọc giao dịch</string>
+    <string name="filter_clear_all">Xóa tất cả</string>
+    <string name="filter_type">Loại</string>
+    <string name="filter_amount_range">Khoảng số tiền</string>
+    <string name="filter_min">Tối thiểu</string>
+    <string name="filter_max">Tối đa</string>
+    <string name="filter_apply">Áp dụng</string>
 </resources>

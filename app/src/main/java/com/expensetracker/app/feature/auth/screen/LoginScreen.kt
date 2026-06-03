@@ -23,7 +23,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -36,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -45,6 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.expensetracker.app.R
 import com.expensetracker.app.core.designsystem.component.AppPrimaryButton
 import com.expensetracker.app.feature.auth.viewmodel.AuthViewModel
 
@@ -81,12 +82,12 @@ fun LoginScreen(
             )
             Spacer(Modifier.height(12.dp))
             Text(
-                text = "Expense Tracker",
+                text = stringResource(R.string.app_name),
                 style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.primary,
             )
             Text(
-                text = "Take control of your finances",
+                text = stringResource(R.string.app_tagline),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -94,7 +95,7 @@ fun LoginScreen(
             Spacer(Modifier.height(40.dp))
 
             Text(
-                text = "Sign In",
+                text = stringResource(R.string.auth_sign_in_title),
                 style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold),
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -104,7 +105,7 @@ fun LoginScreen(
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it; viewModel.clearError() },
-                label = { Text("Email") },
+                label = { Text(stringResource(R.string.auth_email)) },
                 leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
@@ -123,13 +124,15 @@ fun LoginScreen(
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it; viewModel.clearError() },
-                label = { Text("Password") },
+                label = { Text(stringResource(R.string.auth_password)) },
                 leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
                 trailingIcon = {
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
                         Icon(
                             imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                            contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                            contentDescription = stringResource(
+                                if (passwordVisible) R.string.auth_password_hide else R.string.auth_password_show,
+                            ),
                         )
                     }
                 },
@@ -154,7 +157,7 @@ fun LoginScreen(
                 modifier = Modifier.align(Alignment.End),
             ) {
                 Text(
-                    text = "Forgot password?",
+                    text = stringResource(R.string.auth_forgot_password),
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
@@ -173,7 +176,7 @@ fun LoginScreen(
             Spacer(Modifier.height(24.dp))
 
             AppPrimaryButton(
-                text = "Sign In",
+                text = stringResource(R.string.auth_sign_in_button),
                 onClick = { viewModel.signIn(email, password) },
                 modifier = Modifier.fillMaxWidth(),
                 isLoading = uiState.isLoading,
@@ -183,7 +186,7 @@ fun LoginScreen(
 
             TextButton(onClick = onNavigateToRegister) {
                 Text(
-                    text = "Don't have an account? Register",
+                    text = stringResource(R.string.auth_no_account_register),
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }

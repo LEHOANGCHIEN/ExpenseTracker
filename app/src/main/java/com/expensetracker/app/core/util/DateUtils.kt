@@ -12,14 +12,18 @@ object DateUtils {
     private val monthFormatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault())
     private val shortMonthFormatter = DateTimeFormatter.ofPattern("MMM yyyy", Locale.getDefault())
 
-    fun formatRelative(date: LocalDate, today: LocalDate = LocalDate.now()): String {
-        return when {
-            date == today -> "Today"
-            date == today.minusDays(1) -> "Yesterday"
-            date == today.plusDays(1) -> "Tomorrow"
-            date.year == today.year -> date.format(shortFormatter)
-            else -> date.format(mediumFormatter)
-        }
+    fun formatRelative(
+        date: LocalDate,
+        today: LocalDate = LocalDate.now(),
+        todayLabel: String = "Today",
+        yesterdayLabel: String = "Yesterday",
+        tomorrowLabel: String = "Tomorrow",
+    ): String = when {
+        date == today -> todayLabel
+        date == today.minusDays(1) -> yesterdayLabel
+        date == today.plusDays(1) -> tomorrowLabel
+        date.year == today.year -> date.format(shortFormatter)
+        else -> date.format(mediumFormatter)
     }
 
     fun formatMonth(yearMonth: YearMonth): String = yearMonth.format(monthFormatter)

@@ -26,8 +26,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.expensetracker.app.core.designsystem.theme.ExpenseRed
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
+import java.util.Locale
 
 @Composable
 fun DailySpendHeatmap(
@@ -47,16 +50,23 @@ fun DailySpendHeatmap(
     val emptyColor = MaterialTheme.colorScheme.surfaceVariant
     val primaryColor = MaterialTheme.colorScheme.primary
 
+    val locale = Locale.getDefault()
+    val monthHeading = startDate.format(DateTimeFormatter.ofPattern("MMMM yyyy", locale))
+        .replaceFirstChar { it.uppercase(locale) }
+    val weekdayLabels = (0..6).map { offset ->
+        DayOfWeek.MONDAY.plus(offset.toLong()).getDisplayName(TextStyle.NARROW, locale)
+    }
+
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
-            text = startDate.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
+            text = monthHeading,
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(bottom = 8.dp),
         )
 
         Row(modifier = Modifier.fillMaxWidth()) {
-            listOf("M", "T", "W", "T", "F", "S", "S").forEach { label ->
+            weekdayLabels.forEach { label ->
                 Text(
                     text = label,
                     modifier = Modifier.weight(1f),

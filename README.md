@@ -42,7 +42,7 @@ built with Jetpack Compose, Clean Architecture, Room, Hilt, and Gemini AI.
 19. [Challenges and Solutions](#19-challenges-and-solutions)
 20. [Learning Outcomes](#20-learning-outcomes)
 
----
+
 
 <details>
 <summary><h2 style="display:inline">1. Project Overview</h2></summary>
@@ -64,7 +64,7 @@ The application is entirely written in Kotlin with a modern Android tech stack. 
 
 </details>
 
----
+
 
 <details>
 <summary><h2 style="display:inline">2. Problem Statement</h2></summary>

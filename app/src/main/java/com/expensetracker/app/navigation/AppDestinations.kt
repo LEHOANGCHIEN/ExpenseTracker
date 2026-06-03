@@ -36,3 +36,4 @@ import kotlinx.serialization.Serializable
 // ---- Auth screens ----
 @Serializable data object Login
 @Serializable data object Register
+@Serializable data class ForgotPassword(val prefillEmail: String = "")

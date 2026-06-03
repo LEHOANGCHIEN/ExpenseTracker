@@ -18,6 +18,7 @@ import javax.inject.Inject
 data class AuthUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
+    val resetEmailSent: Boolean = false,
 )
 
 @HiltViewModel
@@ -53,6 +54,19 @@ class AuthViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true, error = null) }
             authRepository.signUp(email.trim(), password)
                 .onSuccess { _uiState.update { it.copy(isLoading = false) } }
+                .onFailure { e -> _uiState.update { it.copy(isLoading = false, error = e.message) } }
+        }
+    }
+
+    fun sendPasswordReset(email: String) {
+        if (email.isBlank() || !Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()) {
+            _uiState.update { it.copy(error = "Enter a valid email address") }
+            return
+        }
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, error = null) }
+            authRepository.sendPasswordReset(email)
+                .onSuccess { _uiState.update { it.copy(isLoading = false, resetEmailSent = true) } }
                 .onFailure { e -> _uiState.update { it.copy(isLoading = false, error = e.message) } }
         }
     }

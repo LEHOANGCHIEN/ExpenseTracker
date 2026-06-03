@@ -8,6 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import com.expensetracker.app.feature.auth.screen.ForgotPasswordScreen
 import com.expensetracker.app.feature.auth.screen.LoginScreen
 import com.expensetracker.app.feature.auth.screen.RegisterScreen
 
@@ -25,11 +27,21 @@ fun AuthNavHost() {
         composable<Login> {
             LoginScreen(
                 onNavigateToRegister = { navController.navigate(Register) },
+                onNavigateToForgotPassword = { email ->
+                    navController.navigate(ForgotPassword(prefillEmail = email))
+                },
             )
         }
         composable<Register> {
             RegisterScreen(
                 onNavigateToLogin = { navController.navigateUp() },
+            )
+        }
+        composable<ForgotPassword> { backStackEntry ->
+            val dest = backStackEntry.toRoute<ForgotPassword>()
+            ForgotPasswordScreen(
+                prefillEmail = dest.prefillEmail,
+                onNavigateBack = { navController.navigateUp() },
             )
         }
     }

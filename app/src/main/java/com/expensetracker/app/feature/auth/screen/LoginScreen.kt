@@ -51,6 +51,7 @@ import com.expensetracker.app.feature.auth.viewmodel.AuthViewModel
 @Composable
 fun LoginScreen(
     onNavigateToRegister: () -> Unit,
+    onNavigateToForgotPassword: (prefillEmail: String) -> Unit = {},
     viewModel: AuthViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -147,6 +148,16 @@ fun LoginScreen(
                     },
                 ),
             )
+
+            TextButton(
+                onClick = { onNavigateToForgotPassword(email) },
+                modifier = Modifier.align(Alignment.End),
+            ) {
+                Text(
+                    text = "Forgot password?",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
 
             if (uiState.error != null) {
                 Spacer(Modifier.height(8.dp))

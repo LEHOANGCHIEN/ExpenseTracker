@@ -3,7 +3,7 @@
 # 💰 ExpenseTracker
 
 **A production-grade personal finance Android application**
-built with Jetpack Compose, Clean Architecture, Room, Hilt, Firebase Auth, and Gemini AI.
+built with Jetpack Compose, Clean Architecture, Room, Hilt, Firebase Auth, Firestore, and Gemini AI.
 
 [![Android](https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white)](https://developer.android.com)
 [![Kotlin](https://img.shields.io/badge/Language-Kotlin%202.2.10-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org)
@@ -45,9 +45,9 @@ built with Jetpack Compose, Clean Architecture, Room, Hilt, Firebase Auth, and G
 <details>
 <summary><h2 style="display:inline">1. Project Overview</h2></summary>
 
-**ExpenseTracker** is a fully-featured personal finance management application for Android. It helps users record income and expenses, manage multiple wallets and budgets, visualize spending patterns through rich analytics, and get AI-powered financial advice — all while working completely offline with an optional cloud AI layer.
+**ExpenseTracker** is a fully-featured personal finance management application for Android. It helps users record income and expenses, manage multiple wallets and budgets, visualize spending patterns through rich analytics, and get AI-powered financial advice — all while working completely offline with optional cloud sync and an AI layer.
 
-User accounts are required: the app uses **Firebase Authentication** (email/password) to identify each user, and all financial data (transactions, wallets, categories, budgets) is fully isolated per account. New users start with seeded default categories and a default wallet.
+User accounts are required: the app uses **Firebase Authentication** (email/password) to identify each user, and all financial data (transactions, wallets, categories, budgets) is fully isolated per account. Each user's data is stored in Room (local SQLite) and mirrored to **Cloud Firestore** under `users/{uid}` so it can be restored when signing in on a new device. New users have default categories and a wallet seeded on first sign-in.
 
 | Attribute | Value |
 |---|---|
@@ -93,11 +93,13 @@ Managing personal finances is a universal need, yet most people fail to track th
 <details>
 <summary><h2 style="display:inline">3. Key Features</h2></summary>
 
-### Authentication
+### Authentication & Cloud Sync
 - ✅ **Email/password sign-up and sign-in** — Firebase Authentication
 - ✅ **Forgot password** — Firebase password reset email flow
 - ✅ **Per-user data isolation** — every table is scoped by `userId`; switching accounts shows only that account's data
-- ✅ **New-user bootstrap** — default categories (14) and a default wallet (Cash) are seeded for each new account on first sign-in
+- ✅ **Write-through push** — every local write (transaction, category, wallet, budget, recurring) is mirrored to Firestore under `users/{uid}/{collection}` on a best-effort basis; if the device is offline the local write still succeeds and Firestore's offline SDK queues the push for when connectivity returns
+- ✅ **Pull on sign-in** — when signing into an existing account (especially on a new device), the app fetches all five Firestore collections and upserts them into Room before showing the main app; data is restored automatically
+- ✅ **New-user bootstrap** — on first sign-in, a cloud pull is attempted first; default categories (14) and a default wallet (Cash) are seeded only if Firestore has no data for that account (genuinely new user), and the seeded rows are immediately pushed to Firestore so a second device can pull them
 
 ### Core Finance Management
 - ✅ **Multi-wallet support** — separate wallets for cash, bank accounts, e-wallets
@@ -214,8 +216,9 @@ ExpenseTracker follows **Clean Architecture** with a strict three-layer separati
                             │ implemented by
 ┌───────────────────────────▼─────────────────────────────────────┐
 │                        DATA LAYER                               │
-│  Room DB · DataStore · Firebase Auth · Gemini API · ML Kit     │
+│  Room DB · DataStore · Firebase Auth · Firestore · Gemini · ML │
 │  WorkManager · CurrentUserProvider · UserBootstrapService       │
+│  FirestoreSyncService (push) · FirestoreCloudSyncService (pull) │
 │  Repository Impls · Mappers · DAOs · DTOs · Workers             │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -282,6 +285,20 @@ class SomeViewModel @Inject constructor(...) : ViewModel() {
 }
 ```
 
+### Cloud Sync Architecture
+
+Room is the primary source of truth. Firestore is used for two distinct operations:
+
+**Write-through push (`FirestoreSyncService`)** — every repository (`TransactionRepositoryImpl`, `CategoryRepositoryImpl`, etc.) injects `FirestoreSyncService` and calls the appropriate push method after every local DAO write. Push is fire-and-forget: Firestore's offline SDK queues writes locally when offline and delivers them automatically when connectivity is restored. Failures are logged but never surfaced to the user.
+
+**Pull on sign-in (`FirestoreCloudSyncService`)** — `UserBootstrapService.bootstrapIfNeeded(uid)` is called from `AuthRepositoryImpl` on every `signIn`/`signUp` and from `MainActivity` via `LaunchedEffect` when an existing authenticated session is detected on app start. The pull fetches all five collections (wallets → categories → recurring → budgets → transactions, in FK-dependency order) and upserts each document into Room using `@Insert(onConflict = REPLACE)`. All steps are logged under the `FirestoreSync` tag. Exceptions are caught and logged with full stacktraces; the bootstrap always completes.
+
+**DI cycle avoidance** — `FirestoreCloudSyncService` intentionally does not inject `CurrentUserProvider` (which would create the cycle `AuthRepositoryImpl → UserBootstrapService → FirestoreSyncService → CurrentUserProvider → AuthRepository → AuthRepositoryImpl`). Instead, the `uid` is passed explicitly as a parameter.
+
+**Conflict handling** — last-write-wins based on `updatedAt` / `syncedAt` timestamps stored in each Firestore document. Full two-way conflict resolution is not implemented.
+
+**Limitation** — real-time live sync between two devices used simultaneously is **not implemented**. Cross-device data appears after signing in or restarting on the second device. Real-time multi-device sync is listed as future work.
+
 </details>
 
 
@@ -325,7 +342,7 @@ class SomeViewModel @Inject constructor(...) : ViewModel() {
 |---|---|---|
 | Firebase BOM | 34.14.0 | Firebase version management |
 | Firebase Auth | via BOM | Email/password authentication |
-| Firebase Firestore | via BOM | Cloud database (dependency in place) |
+| Firebase Firestore | via BOM | Per-user cloud database: write-through push from repositories + pull on sign-in to restore data on a new device |
 | Google Services Gradle Plugin | 4.4.4 | Processes `google-services.json` |
 | kotlinx-coroutines-play-services | 1.9.0 | `await()` extension for Firebase Tasks |
 
@@ -506,11 +523,25 @@ All core functionality works without internet access. Data is stored locally usi
 |---|---|
 | Sign up / Sign in | Firebase Authentication |
 | Password reset email | Firebase Authentication |
+| Write-through push: mirror local writes to cloud | Firebase Firestore |
+| Pull on sign-in: restore data on a new device | Firebase Firestore |
 | AI chat with financial context | Gemini 2.5 Flash |
 | Natural language transaction parsing | Gemini 2.5 Flash (JSON mode) |
 | Transaction auto-categorization | Gemini 2.5 Flash (JSON mode) |
 | OCR parsing fallback and enhancement | Gemini 2.5 Flash |
 | Monthly spending insights generation | Gemini 2.5 Flash |
+
+### Cloud Sync
+
+The app uses an **offline-first** model: Room SQLite is always the primary source of truth and every feature works fully offline.
+
+**Write-through push** — after each local DAO write in a repository (add, update, or delete), a corresponding call to `FirestoreSyncService` mirrors the change to Firestore under `users/{uid}/{collection}/{id}`. If the device is offline, Firestore's local SDK persistence queues the write and delivers it automatically when connectivity returns. Push failures are logged but never shown to the user.
+
+**Pull on sign-in** — when signing into an existing account (especially on a new device with an empty local database), `UserBootstrapService` fetches all five Firestore collections before deciding whether to seed defaults. All documents are upserted into Room with `@Insert(onConflict = REPLACE)`. This means an existing account's full data — every transaction, category, wallet, budget, and recurring transaction — is restored automatically on the new device.
+
+**What is NOT synced in real-time** — if the same account is open on two devices simultaneously, changes made on one device do not appear instantly on the other. Cross-device data becomes available the next time the user signs in or the app cold-starts on the second device. Real-time multi-device live sync (Firestore snapshot listeners keeping two live UIs in sync) is listed as future work.
+
+**Security** — Firestore security rules restrict each user to reading and writing only their own `users/{uid}` subtree. No user can access another user's data.
 
 ### Graceful Degradation
 - If `geminiEnabled = false` in settings, all AI features are disabled cleanly.
@@ -755,13 +786,18 @@ Room database version **3** with JSON schema export enabled. The database uses `
 
 Every user-owned table has a `userId TEXT NOT NULL DEFAULT ''` column. All DAO read queries are filtered by `WHERE userId = :userId`. All insert/update operations stamp the current user's Firebase UID via `CurrentUserProvider`. When no user is signed in, the UID is `""` and all queries return empty results — no data leaks between accounts.
 
-### New-User Bootstrap
+### New-User Bootstrap and Cloud Restore
 
-When a user signs in or registers for the first time, `UserBootstrapService.bootstrapIfNeeded(uid)` checks `categoryDao.countByUserId(uid)`. If zero categories exist for that UID, it inserts:
-- **14 default categories** (10 expense: Ăn uống, Di chuyển, Mua sắm, …; 4 income: Lương, Thưởng, Đầu tư, Thu nhập khác)
-- **1 default wallet**: "Cash" (💵, #26A69A, 0 VND)
+`UserBootstrapService.bootstrapIfNeeded(uid)` is called on every sign-in and sign-up, and also when the app starts with an existing authenticated session. It follows this order:
 
-All seeded rows are stamped with the user's Firebase UID. This runs once per user, and is idempotent.
+1. **Fast return** — if `categoryDao.countByUserId(uid) > 0`, local data already exists (normal restart on the same device); returns immediately.
+2. **Cloud pull** — if local is empty, `FirestoreCloudSyncService.syncFromCloud(uid)` fetches all five Firestore collections and upserts them into Room.
+3. **Existing account** — if categories are now present after the pull, the user's cloud data has been restored; seeding is skipped.
+4. **New account** — if categories are still absent (cloud had nothing), the following defaults are seeded and immediately pushed to Firestore so a future second device can pull them rather than re-seeding:
+   - **14 default categories** (10 expense: Ăn uống, Di chuyển, Mua sắm, …; 4 income: Lương, Thưởng, Đầu tư, Thu nhập khác)
+   - **1 default wallet**: "Cash" (💵, #26A69A, 0 VND)
+
+A `Mutex` prevents concurrent runs of `bootstrapIfNeeded` (e.g., the sign-in coroutine and the `MainActivity` `LaunchedEffect` both firing when auth state changes) — whichever runs second finds `count > 0` and exits immediately.
 
 ### Entity Relationship Diagram
 
@@ -930,7 +966,7 @@ data class AddEditTransaction(
 | `org.jetbrains.kotlinx:kotlinx-serialization-json` | 1.7.3 | JSON serialization |
 | **`com.google.firebase:firebase-bom`** | **34.14.0** | **Firebase version management** |
 | **`com.google.firebase:firebase-auth`** | **via BOM** | **Email/password authentication** |
-| **`com.google.firebase:firebase-firestore`** | **via BOM** | **Cloud database (dependency in place)** |
+| **`com.google.firebase:firebase-firestore`** | **via BOM** | **Per-user cloud database: write-through push + pull on sign-in** |
 | `com.google.ai.client.generativeai:generativeai` | 0.9.0 | Gemini AI SDK |
 | `com.google.mlkit:text-recognition` | 16.0.1 | On-device OCR |
 | `androidx.camera:camera-camera2` | 1.4.2 | Camera hardware |
@@ -996,6 +1032,32 @@ The app requires a valid `google-services.json` to compile. The file is not comm
 5. In the Firebase Console, enable **Authentication → Sign-in method → Email/Password**.
 
 > Without `google-services.json`, the Google Services Gradle plugin will fail at build time. No SHA-1 fingerprint or Google Sign-In setup is required.
+
+### Step 2c: Enable Firestore and Configure Security Rules
+
+Cloud sync requires Cloud Firestore to be enabled in your Firebase project:
+
+1. In the Firebase Console, go to **Build → Firestore Database**.
+2. Click **Create database**, select **Native mode**, and choose a region.
+3. Once provisioned, navigate to the **Rules** tab and replace the default rules with:
+
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null
+                        && request.auth.uid == userId;
+    }
+  }
+}
+```
+
+4. Click **Publish**.
+
+These rules ensure each signed-in user can only read and write their own `users/{uid}` subtree; no user can access another user's data.
+
+> Without Firestore enabled, the app still works fully offline. Push calls will fail silently (logged as errors), and the pull on sign-in will complete immediately with no data — local seeding of defaults will run as normal for new accounts.
 
 ### Step 3: Open in Android Studio
 
@@ -1070,7 +1132,7 @@ The commands below will execute those stubs successfully but do not verify any a
 <summary><h2 style="display:inline">18. Future Improvements</h2></summary>
 
 ### High Priority
-- **Firestore cloud sync** — Firebase Firestore is already added as a dependency; syncing per-user Room data to Firestore for multi-device access is the natural next step
+- **Real-time multi-device live sync** — The current Firestore integration uses write-through push and pull-on-sign-in; changes on one device do not appear on another device in real time. Implementing Firestore snapshot listeners to keep a live open session in sync across two devices simultaneously is the natural next step.
 - **Explicit Room migrations** — Replace `fallbackToDestructiveMigration()` with versioned migration scripts before production
 - **Biometric lock** — Fingerprint / face unlock to protect sensitive financial data
 - **Widgets** — Home screen balance and quick-add widgets via Glance API
@@ -1167,6 +1229,10 @@ This project was built as a university final project for the **Mobile Developmen
 - Designed a reactive auth gate at the `MainActivity` level using `callbackFlow` and `AuthStateListener`
 - Mapped Firebase-specific exception types to domain-level sealed classes to keep the data layer decoupled from the UI
 - Implemented per-user data isolation in a local SQLite database using a `userId` column and a `CurrentUserProvider` singleton
+- Built a write-through Firestore sync layer: every repository mirrors local DAO writes to Firestore as fire-and-forget push operations, fully transparent to the UI
+- Implemented a pull-on-sign-in restore flow with reverse Firestore-to-Room mappers for all five entity types, with per-field null safety and full exception logging
+- Diagnosed and solved a Hilt DI cycle (`AuthRepositoryImpl → UserBootstrapService → FirestoreSyncService → CurrentUserProvider → AuthRepository`) by separating push and pull responsibilities into distinct classes with different dependency graphs
+- Designed a bootstrap/restore protocol that correctly distinguishes a new account (seed defaults) from an existing account on a new device (pull from cloud) using a pull-first, check-after pattern with a coroutine `Mutex` to prevent concurrent bootstrap races
 
 **Jetpack Compose**
 - Built a complete production app entirely in Compose, including custom components, animations, charts, and the camera preview

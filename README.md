@@ -85,7 +85,6 @@ Managing personal finances is a universal need, yet most people fail to track th
 
 </details>
 
----
 
 <details>
 <summary><h2 style="display:inline">3. Key Features</h2></summary>
@@ -128,7 +127,6 @@ Managing personal finances is a universal need, yet most people fail to track th
 
 </details>
 
----
 
 <details>
 <summary><h2 style="display:inline">4. Application Screens</h2></summary>
@@ -174,7 +172,6 @@ Managing personal finances is a universal need, yet most people fail to track th
 
 </details>
 
----
 
 <details>
 <summary><h2 style="display:inline">5. Technical Architecture</h2></summary>
@@ -257,7 +254,6 @@ class SomeViewModel @Inject constructor(...) : ViewModel() {
 
 </details>
 
----
 
 <details>
 <summary><h2 style="display:inline">6. Technology Stack</h2></summary>
@@ -327,7 +323,6 @@ class SomeViewModel @Inject constructor(...) : ViewModel() {
 
 </details>
 
----
 
 <details>
 <summary><h2 style="display:inline">7. Project Structure</h2></summary>
@@ -430,7 +425,6 @@ ExpenseTracker/
 
 </details>
 
----
 
 <details>
 <summary><h2 style="display:inline">8. Offline and Online Features</h2></summary>
@@ -468,7 +462,6 @@ All core functionality works without internet access. Data is stored locally usi
 
 </details>
 
----
 
 <details>
 <summary><h2 style="display:inline">9. AI Features</h2></summary>
@@ -535,7 +528,6 @@ After ML Kit extracts raw text from a receipt image, Gemini's `buildReceiptParse
 
 </details>
 
----
 
 <details>
 <summary><h2 style="display:inline">10. OCR Receipt Scanning</h2></summary>
@@ -597,7 +589,6 @@ The `ReceiptParser` class is entirely heuristic-based and handles both Vietnames
 
 </details>
 
----
 
 <details>
 <summary><h2 style="display:inline">11. Statistics and Analytics</h2></summary>
@@ -644,7 +635,6 @@ All statistics are computed from Room queries using:
 
 </details>
 
----
 
 <details>
 <summary><h2 style="display:inline">12. Localization Support</h2></summary>
@@ -686,7 +676,6 @@ The `LocaleHelper` utility updates the app's `Configuration` at runtime:
 
 </details>
 
----
 
 <details>
 <summary><h2 style="display:inline">13. Database Design</h2></summary>
@@ -758,7 +747,6 @@ On first install, a `RoomDatabase.Callback` seeds default categories (Food, Tran
 
 </details>
 
----
 
 <details>
 <summary><h2 style="display:inline">14. Design Patterns and Architecture</h2></summary>
@@ -811,7 +799,6 @@ data class AddEditTransaction(
 
 </details>
 
----
 
 <details>
 <summary><h2 style="display:inline">15. Libraries and Dependencies</h2></summary>
@@ -854,7 +841,6 @@ data class AddEditTransaction(
 
 </details>
 
----
 
 <details>
 <summary><h2 style="display:inline">16. Installation Guide</h2></summary>
@@ -897,7 +883,6 @@ GEMINI_API_KEY=your_gemini_api_key_here
 
 </details>
 
----
 
 <details>
 <summary><h2 style="display:inline">17. Build and Run Instructions</h2></summary>
@@ -952,7 +937,6 @@ The commands below will execute those stubs successfully but do not verify any a
 
 </details>
 
----
 
 <details>
 <summary><h2 style="display:inline">18. Future Improvements</h2></summary>
@@ -982,7 +966,6 @@ The commands below will execute those stubs successfully but do not verify any a
 
 </details>
 
----
 
 <details>
 <summary><h2 style="display:inline">19. Challenges and Solutions</h2></summary>
@@ -1025,7 +1008,6 @@ The commands below will execute those stubs successfully but do not verify any a
 
 </details>
 
----
 
 <details>
 <summary><h2 style="display:inline">20. Learning Outcomes</h2></summary>
@@ -1075,15 +1057,13 @@ This project was built as a university final project for the **Mobile Developmen
 
 </details>
 
----
 
 <div align="center">
 
----
 
 **ExpenseTracker** · UIT Final Project · Mobile Development
 
-*Le Hoang Chien — lehoangchiena@gmail.com*
+*Le Hoang Chien — lehoangchien32005@gmail.com*
 
 Built with ❤️ and Kotlin
 

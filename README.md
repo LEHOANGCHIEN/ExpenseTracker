@@ -44,7 +44,8 @@ built with Jetpack Compose, Clean Architecture, Room, Hilt, and Gemini AI.
 
 ---
 
-## 1. Project Overview
+<details>
+<summary><h2 style="display:inline">1. Project Overview</h2></summary>
 
 **ExpenseTracker** is a fully-featured personal finance management application for Android. It helps users record income and expenses, manage multiple wallets and budgets, visualize spending patterns through rich analytics, and get AI-powered financial advice — all while working completely offline with an optional cloud AI layer.
 
@@ -61,9 +62,12 @@ built with Jetpack Compose, Clean Architecture, Room, Hilt, and Gemini AI.
 
 The application is entirely written in Kotlin with a modern Android tech stack. All core functionality — transaction recording, budget management, statistics, and recurring transactions — works **fully offline**. AI chat, receipt parsing, and monthly insight generation are powered by **Google Gemini 2.5 Flash** and require an internet connection and a Gemini API key.
 
+</details>
+
 ---
 
-## 2. Problem Statement
+<details>
+<summary><h2 style="display:inline">2. Problem Statement</h2></summary>
 
 Managing personal finances is a universal need, yet most people fail to track their spending consistently because existing tools are either too complex, lack intelligent assistance, or don't match everyday workflows in Vietnamese contexts.
 
@@ -83,9 +87,12 @@ Managing personal finances is a universal need, yet most people fail to track th
 
 **Language barrier.** Vietnamese users often find financial apps in English confusing. ExpenseTracker supports full Vietnamese localization including all strings, currency formatting (VND), and date conventions.
 
+</details>
+
 ---
 
-## 3. Key Features
+<details>
+<summary><h2 style="display:inline">3. Key Features</h2></summary>
 
 ### Core Finance Management
 - ✅ **Multi-wallet support** — separate wallets for cash, bank accounts, e-wallets
@@ -123,9 +130,12 @@ Managing personal finances is a universal need, yet most people fail to track th
 - ✅ **Edge-to-edge** display support
 - ✅ **Onboarding flow** for first-time users
 
+</details>
+
 ---
 
-## 4. Application Screens
+<details>
+<summary><h2 style="display:inline">4. Application Screens</h2></summary>
 
 ### Bottom Navigation (4 Main Tabs)
 
@@ -166,9 +176,12 @@ Managing personal finances is a universal need, yet most people fail to track th
 - **Manual Tab** — Fast amount + note entry, category chip selector
 - **AI Parse Tab** — Natural language input with voice recognition button, confidence score display, and parsed transaction preview
 
+</details>
+
 ---
 
-## 5. Technical Architecture
+<details>
+<summary><h2 style="display:inline">5. Technical Architecture</h2></summary>
 
 ExpenseTracker follows **Clean Architecture** with a strict three-layer separation.
 
@@ -246,9 +259,12 @@ class SomeViewModel @Inject constructor(...) : ViewModel() {
 }
 ```
 
+</details>
+
 ---
 
-## 6. Technology Stack
+<details>
+<summary><h2 style="display:inline">6. Technology Stack</h2></summary>
 
 ### Core Platform
 | Technology | Version | Purpose |
@@ -313,9 +329,12 @@ class SomeViewModel @Inject constructor(...) : ViewModel() {
 | Lifecycle ViewModel Compose | 2.8.7 | ViewModel scoping |
 | Lifecycle Runtime Compose | 2.8.7 | `collectAsStateWithLifecycle` |
 
+</details>
+
 ---
 
-## 7. Project Structure
+<details>
+<summary><h2 style="display:inline">7. Project Structure</h2></summary>
 
 ```
 ExpenseTracker/
@@ -413,9 +432,12 @@ ExpenseTracker/
 └── local.properties                           # GEMINI_API_KEY (not committed)
 ```
 
+</details>
+
 ---
 
-## 8. Offline and Online Features
+<details>
+<summary><h2 style="display:inline">8. Offline and Online Features</h2></summary>
 
 ### Fully Offline Features
 All core functionality works without internet access. Data is stored locally using Room SQLite and DataStore.
@@ -448,9 +470,12 @@ All core functionality works without internet access. Data is stored locally usi
 - OCR falls back to pure ML Kit parsing if Gemini is unavailable.
 - Previously generated AI insights remain accessible from the local database even when offline.
 
+</details>
+
 ---
 
-## 9. AI Features
+<details>
+<summary><h2 style="display:inline">9. AI Features</h2></summary>
 
 The AI integration uses **Google Gemini 2.5 Flash** (`gemini-2.5-flash`) via the official `com.google.ai.client.generativeai` SDK (version 0.9.0).
 
@@ -512,9 +537,12 @@ The `MonthlyInsightsWorker` runs every 30 days via WorkManager. It:
 
 After ML Kit extracts raw text from a receipt image, Gemini's `buildReceiptParsePrompt()` is used as a fallback and enhancement step to extract structured fields from ambiguous OCR output.
 
+</details>
+
 ---
 
-## 10. OCR Receipt Scanning
+<details>
+<summary><h2 style="display:inline">10. OCR Receipt Scanning</h2></summary>
 
 ### Architecture
 
@@ -571,9 +599,12 @@ The `ReceiptParser` class is entirely heuristic-based and handles both Vietnames
 - Date found: +0.25
 - Merchant found: +0.25
 
+</details>
+
 ---
 
-## 11. Statistics and Analytics
+<details>
+<summary><h2 style="display:inline">11. Statistics and Analytics</h2></summary>
 
 The `StatisticsScreen` and `StatisticsViewModel` provide comprehensive spending analytics.
 
@@ -615,9 +646,12 @@ All statistics are computed from Room queries using:
 - `observeByDateRange()` — per-transaction data for charting
 - `getSumByCategoryAndDateRange()` — category-level breakdowns
 
+</details>
+
 ---
 
-## 12. Localization Support
+<details>
+<summary><h2 style="display:inline">12. Localization Support</h2></summary>
 
 The app supports **English (en)** and **Vietnamese (vi)** with complete parity — every user-visible string has a translation in both languages.
 
@@ -654,9 +688,12 @@ The `LocaleHelper` utility updates the app's `Configuration` at runtime:
 - Formats according to the selected currency code stored in preferences
 - The AI system prompt always includes the user's currency for consistent AI responses
 
+</details>
+
 ---
 
-## 13. Database Design
+<details>
+<summary><h2 style="display:inline">13. Database Design</h2></summary>
 
 Room database version **2** with JSON schema export enabled. The database uses `fallbackToDestructiveMigration()` (appropriate for a prototype; production would use explicit migration scripts).
 
@@ -723,9 +760,12 @@ INDEX(walletId), INDEX(categoryId)
 ### Database Seeder
 On first install, a `RoomDatabase.Callback` seeds default categories (Food, Transport, Shopping, Entertainment, etc.) with Vietnamese and English names, icons, and colors so the app is immediately usable.
 
+</details>
+
 ---
 
-## 14. Design Patterns and Architecture
+<details>
+<summary><h2 style="display:inline">14. Design Patterns and Architecture</h2></summary>
 
 ### MVVM (Model-View-ViewModel)
 Every screen has a corresponding ViewModel that:
@@ -773,9 +813,12 @@ data class AddEditTransaction(
 )
 ```
 
+</details>
+
 ---
 
-## 15. Libraries and Dependencies
+<details>
+<summary><h2 style="display:inline">15. Libraries and Dependencies</h2></summary>
 
 ### Complete Dependency List
 
@@ -813,9 +856,12 @@ data class AddEditTransaction(
 | `androidx.work:work-runtime-ktx` | 2.9.1 | WorkManager |
 | `com.google.accompanist:accompanist-permissions` | 0.36.0 | Runtime permissions |
 
+</details>
+
 ---
 
-## 16. Installation Guide
+<details>
+<summary><h2 style="display:inline">16. Installation Guide</h2></summary>
 
 ### Prerequisites
 
@@ -853,9 +899,12 @@ GEMINI_API_KEY=your_gemini_api_key_here
 1. Connect an Android device or start an emulator (API 26+).
 2. Click **Run ▶** or use `Shift+F10`.
 
+</details>
+
 ---
 
-## 17. Build and Run Instructions
+<details>
+<summary><h2 style="display:inline">17. Build and Run Instructions</h2></summary>
 
 ### Debug Build (Development)
 
@@ -905,9 +954,12 @@ The commands below will execute those stubs successfully but do not verify any a
 - `org.jetbrains.kotlin.android` is **not applied anywhere**. AGP 9.x has built-in Kotlin support, so that plugin is obsolete and replaced by the dedicated `org.jetbrains.kotlin.plugin.compose` and `org.jetbrains.kotlin.plugin.serialization` plugins. The five plugins actually applied in `app/build.gradle.kts` are: `com.android.application`, `org.jetbrains.kotlin.plugin.compose`, `org.jetbrains.kotlin.plugin.serialization`, `com.google.devtools.ksp`, and `com.google.dagger.hilt.android`.
 - Room schema files are exported to `app/schemas/` — include this directory in version control to track database migrations.
 
+</details>
+
 ---
 
-## 18. Future Improvements
+<details>
+<summary><h2 style="display:inline">18. Future Improvements</h2></summary>
 
 ### High Priority
 - **Cloud sync** — Back up and sync transactions across devices using Firebase Firestore or a REST API
@@ -932,9 +984,12 @@ The commands below will execute those stubs successfully but do not verify any a
 - **Unit and integration tests** — Current test coverage is minimal; full ViewModel and repository test suites needed
 - **Custom recurring frequencies** — "Every 3rd Friday" or "Twice a month" patterns
 
+</details>
+
 ---
 
-## 19. Challenges and Solutions
+<details>
+<summary><h2 style="display:inline">19. Challenges and Solutions</h2></summary>
 
 ### Challenge 1: Vietnamese Receipt OCR Accuracy
 
@@ -972,9 +1027,12 @@ The commands below will execute those stubs successfully but do not verify any a
 
 **Solution:** `LocaleHelper` updates the `Configuration.locale` of the `Application` context before `setContent{}` in `MainActivity`. When the user changes language in Settings, the preference is saved to DataStore and `MainActivity` is recreated via `recreate()`, applying the new locale on the next lifecycle start.
 
+</details>
+
 ---
 
-## 20. Learning Outcomes
+<details>
+<summary><h2 style="display:inline">20. Learning Outcomes</h2></summary>
 
 This project was built as a university final project for the **Mobile Development** course at **UIT (University of Information Technology, Ho Chi Minh City)**. It covers the full Android development lifecycle from architecture design to production-quality UI.
 
@@ -1018,6 +1076,8 @@ This project was built as a university final project for the **Mobile Developmen
 - **Project scoping** — deciding which features to implement fully vs. stub out
 - **Technical writing** — documenting architecture decisions and design rationale
 - **Incremental delivery** — building features in vertical slices (data → domain → UI) rather than horizontal layers
+
+</details>
 
 ---
 

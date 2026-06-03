@@ -42,8 +42,6 @@ built with Jetpack Compose, Clean Architecture, Room, Hilt, and Gemini AI.
 19. [Challenges and Solutions](#19-challenges-and-solutions)
 20. [Learning Outcomes](#20-learning-outcomes)
 
-
-
 <details>
 <summary><h2 style="display:inline">1. Project Overview</h2></summary>
 
@@ -63,8 +61,6 @@ built with Jetpack Compose, Clean Architecture, Room, Hilt, and Gemini AI.
 The application is entirely written in Kotlin with a modern Android tech stack. All core functionality — transaction recording, budget management, statistics, and recurring transactions — works **fully offline**. AI chat, receipt parsing, and monthly insight generation are powered by **Google Gemini 2.5 Flash** and require an internet connection and a Gemini API key.
 
 </details>
-
-
 
 <details>
 <summary><h2 style="display:inline">2. Problem Statement</h2></summary>

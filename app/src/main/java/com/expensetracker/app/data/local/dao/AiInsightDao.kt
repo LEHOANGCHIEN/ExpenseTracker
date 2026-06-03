@@ -10,11 +10,11 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface AiInsightDao {
 
-    @Query("SELECT * FROM ai_insights WHERE dismissed = 0 ORDER BY generatedAt DESC")
-    fun observeUndismissed(): Flow<List<AiInsightEntity>>
+    @Query("SELECT * FROM ai_insights WHERE userId = :userId AND dismissed = 0 ORDER BY generatedAt DESC")
+    fun observeUndismissed(userId: String): Flow<List<AiInsightEntity>>
 
-    @Query("SELECT * FROM ai_insights ORDER BY generatedAt DESC")
-    fun observeAll(): Flow<List<AiInsightEntity>>
+    @Query("SELECT * FROM ai_insights WHERE userId = :userId ORDER BY generatedAt DESC")
+    fun observeAll(userId: String): Flow<List<AiInsightEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(insight: AiInsightEntity): Long

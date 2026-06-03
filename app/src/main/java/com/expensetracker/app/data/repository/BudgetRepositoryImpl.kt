@@ -1,5 +1,6 @@
 package com.expensetracker.app.data.repository
 
+import com.expensetracker.app.data.local.CurrentUserProvider
 import com.expensetracker.app.data.local.dao.BudgetDao
 import com.expensetracker.app.data.mapper.toDomain
 import com.expensetracker.app.data.mapper.toEntity
@@ -13,25 +14,26 @@ import javax.inject.Singleton
 @Singleton
 class BudgetRepositoryImpl @Inject constructor(
     private val budgetDao: BudgetDao,
+    private val currentUserProvider: CurrentUserProvider,
 ) : BudgetRepository {
 
     override fun observeAll(): Flow<List<Budget>> =
-        budgetDao.observeAll().map { list -> list.map { it.toDomain() } }
+        budgetDao.observeAll(currentUserProvider.uid).map { list -> list.map { it.toDomain() } }
 
     override fun observeActive(): Flow<List<Budget>> =
-        budgetDao.observeActive().map { list -> list.map { it.toDomain() } }
+        budgetDao.observeActive(currentUserProvider.uid).map { list -> list.map { it.toDomain() } }
 
     override fun observeByCategory(categoryId: Long): Flow<List<Budget>> =
-        budgetDao.observeByCategory(categoryId).map { list -> list.map { it.toDomain() } }
+        budgetDao.observeByCategory(currentUserProvider.uid, categoryId).map { list -> list.map { it.toDomain() } }
 
     override suspend fun getById(id: Long): Budget? =
         budgetDao.getById(id)?.toDomain()
 
     override suspend fun add(budget: Budget): Long =
-        budgetDao.insert(budget.toEntity())
+        budgetDao.insert(budget.toEntity().copy(userId = currentUserProvider.uid))
 
     override suspend fun update(budget: Budget) =
-        budgetDao.update(budget.toEntity())
+        budgetDao.update(budget.toEntity().copy(userId = currentUserProvider.uid))
 
     override suspend fun delete(id: Long) =
         budgetDao.deleteById(id)

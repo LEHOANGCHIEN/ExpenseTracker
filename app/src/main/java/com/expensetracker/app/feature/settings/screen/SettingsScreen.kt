@@ -145,6 +145,22 @@ fun SettingsScreen(
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState()),
         ) {
+            // ---- Account ----
+            SettingsSection("Account") {
+                val email = viewModel.currentUserEmail
+                if (email != null) {
+                    SettingsInfoRow("Signed in as", email)
+                    Spacer(Modifier.height(12.dp))
+                }
+                OutlinedButton(
+                    onClick = viewModel::signOut,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                ) {
+                    Text("Sign Out")
+                }
+            }
+
             // ---- Language ----
             SettingsSection(stringResource(R.string.settings_section_language)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

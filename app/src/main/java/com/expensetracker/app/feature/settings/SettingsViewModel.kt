@@ -9,6 +9,7 @@ import com.expensetracker.app.core.util.LocaleHelper
 import com.expensetracker.app.data.backup.BackupService
 import com.expensetracker.app.data.local.datastore.UserPreferences
 import com.expensetracker.app.data.local.database.AppDatabase
+import com.expensetracker.app.domain.repository.AuthRepository
 import com.expensetracker.app.domain.repository.PreferencesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -41,7 +42,15 @@ class SettingsViewModel @Inject constructor(
     private val backupService: BackupService,
     private val appDatabase: AppDatabase,
     @ApplicationContext private val context: Context,
+    private val authRepository: AuthRepository,
 ) : ViewModel() {
+
+    val currentUserEmail: String?
+        get() = authRepository.currentUser?.email
+
+    fun signOut() {
+        viewModelScope.launch { authRepository.signOut() }
+    }
 
     val preferences: StateFlow<UserPreferences> = preferencesRepository.preferences
         .stateIn(

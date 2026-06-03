@@ -28,7 +28,7 @@ import com.expensetracker.app.data.local.entity.WalletEntity
         AiChatMessageEntity::class,
         AiInsightEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)

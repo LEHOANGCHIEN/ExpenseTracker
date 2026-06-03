@@ -37,6 +37,7 @@ import java.time.LocalDateTime
         ),
     ],
     indices = [
+        Index("userId"),
         Index("walletId"),
         Index("categoryId"),
         Index("date"),
@@ -46,6 +47,7 @@ import java.time.LocalDateTime
 )
 data class TransactionEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val userId: String = "",
     val walletId: Long,
     val categoryId: Long,
     val amount: Double,

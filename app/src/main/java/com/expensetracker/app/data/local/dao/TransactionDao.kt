@@ -14,38 +14,39 @@ import java.time.LocalDate
 @Dao
 interface TransactionDao {
 
-    @Query("SELECT * FROM transactions WHERE parentSplitId IS NULL ORDER BY date DESC, createdAt DESC")
-    fun observeAll(): Flow<List<TransactionEntity>>
+    @Query("SELECT * FROM transactions WHERE userId = :userId AND parentSplitId IS NULL ORDER BY date DESC, createdAt DESC")
+    fun observeAll(userId: String): Flow<List<TransactionEntity>>
 
     @Query("""
         SELECT * FROM transactions
-        WHERE date BETWEEN :start AND :end AND parentSplitId IS NULL
+        WHERE userId = :userId AND date BETWEEN :start AND :end AND parentSplitId IS NULL
         ORDER BY date DESC, createdAt DESC
     """)
-    fun observeByDateRange(start: LocalDate, end: LocalDate): Flow<List<TransactionEntity>>
+    fun observeByDateRange(userId: String, start: LocalDate, end: LocalDate): Flow<List<TransactionEntity>>
 
     @Query("""
         SELECT * FROM transactions
-        WHERE categoryId = :categoryId AND parentSplitId IS NULL
+        WHERE userId = :userId AND categoryId = :categoryId AND parentSplitId IS NULL
         ORDER BY date DESC, createdAt DESC
     """)
-    fun observeByCategory(categoryId: Long): Flow<List<TransactionEntity>>
+    fun observeByCategory(userId: String, categoryId: Long): Flow<List<TransactionEntity>>
 
     @Query("""
         SELECT * FROM transactions
-        WHERE walletId = :walletId AND parentSplitId IS NULL
+        WHERE userId = :userId AND walletId = :walletId AND parentSplitId IS NULL
         ORDER BY date DESC, createdAt DESC
     """)
-    fun observeByWallet(walletId: Long): Flow<List<TransactionEntity>>
+    fun observeByWallet(userId: String, walletId: Long): Flow<List<TransactionEntity>>
 
-    @Query("SELECT * FROM transactions WHERE parentSplitId = :parentId ORDER BY id ASC")
-    fun observeSplitChildren(parentId: Long): Flow<List<TransactionEntity>>
+    @Query("SELECT * FROM transactions WHERE userId = :userId AND parentSplitId = :parentId ORDER BY id ASC")
+    fun observeSplitChildren(userId: String, parentId: Long): Flow<List<TransactionEntity>>
 
     @Query("""
         SELECT COALESCE(SUM(amount), 0.0) FROM transactions
-        WHERE type = :type AND date BETWEEN :start AND :end AND parentSplitId IS NULL
+        WHERE userId = :userId AND type = :type AND date BETWEEN :start AND :end AND parentSplitId IS NULL
     """)
     fun getTotalByTypeAndDateRange(
+        userId: String,
         type: TransactionType,
         start: LocalDate,
         end: LocalDate,
@@ -53,9 +54,10 @@ interface TransactionDao {
 
     @Query("""
         SELECT COALESCE(SUM(amount), 0.0) FROM transactions
-        WHERE categoryId = :categoryId AND date BETWEEN :start AND :end AND parentSplitId IS NULL
+        WHERE userId = :userId AND categoryId = :categoryId AND date BETWEEN :start AND :end AND parentSplitId IS NULL
     """)
     fun getSumByCategoryAndDateRange(
+        userId: String,
         categoryId: Long,
         start: LocalDate,
         end: LocalDate,
@@ -63,10 +65,10 @@ interface TransactionDao {
 
     @Query("""
         SELECT * FROM transactions
-        WHERE note LIKE '%' || :query || '%' AND parentSplitId IS NULL
+        WHERE userId = :userId AND note LIKE '%' || :query || '%' AND parentSplitId IS NULL
         ORDER BY date DESC
     """)
-    fun searchByNote(query: String): Flow<List<TransactionEntity>>
+    fun searchByNote(userId: String, query: String): Flow<List<TransactionEntity>>
 
     @Query("SELECT * FROM transactions WHERE id = :id")
     suspend fun getById(id: Long): TransactionEntity?

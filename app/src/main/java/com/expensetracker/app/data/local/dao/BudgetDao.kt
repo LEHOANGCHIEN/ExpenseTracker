@@ -12,14 +12,14 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface BudgetDao {
 
-    @Query("SELECT * FROM budgets ORDER BY id ASC")
-    fun observeAll(): Flow<List<BudgetEntity>>
+    @Query("SELECT * FROM budgets WHERE userId = :userId ORDER BY id ASC")
+    fun observeAll(userId: String): Flow<List<BudgetEntity>>
 
-    @Query("SELECT * FROM budgets WHERE isActive = 1 ORDER BY id ASC")
-    fun observeActive(): Flow<List<BudgetEntity>>
+    @Query("SELECT * FROM budgets WHERE userId = :userId AND isActive = 1 ORDER BY id ASC")
+    fun observeActive(userId: String): Flow<List<BudgetEntity>>
 
-    @Query("SELECT * FROM budgets WHERE categoryId = :categoryId ORDER BY id ASC")
-    fun observeByCategory(categoryId: Long): Flow<List<BudgetEntity>>
+    @Query("SELECT * FROM budgets WHERE userId = :userId AND categoryId = :categoryId ORDER BY id ASC")
+    fun observeByCategory(userId: String, categoryId: Long): Flow<List<BudgetEntity>>
 
     @Query("SELECT * FROM budgets WHERE id = :id")
     suspend fun getById(id: Long): BudgetEntity?

@@ -1,5 +1,6 @@
 package com.expensetracker.app.data.repository
 
+import com.expensetracker.app.data.local.CurrentUserProvider
 import com.expensetracker.app.data.local.dao.CategoryDao
 import com.expensetracker.app.data.mapper.toDomain
 import com.expensetracker.app.data.mapper.toEntity
@@ -14,22 +15,23 @@ import javax.inject.Singleton
 @Singleton
 class CategoryRepositoryImpl @Inject constructor(
     private val categoryDao: CategoryDao,
+    private val currentUserProvider: CurrentUserProvider,
 ) : CategoryRepository {
 
     override fun observeAll(): Flow<List<Category>> =
-        categoryDao.observeAll().map { list -> list.map { it.toDomain() } }
+        categoryDao.observeAll(currentUserProvider.uid).map { list -> list.map { it.toDomain() } }
 
     override fun observeByType(type: TransactionType): Flow<List<Category>> =
-        categoryDao.observeByType(type).map { list -> list.map { it.toDomain() } }
+        categoryDao.observeByType(currentUserProvider.uid, type).map { list -> list.map { it.toDomain() } }
 
     override suspend fun getById(id: Long): Category? =
         categoryDao.getById(id)?.toDomain()
 
     override suspend fun add(category: Category): Long =
-        categoryDao.insert(category.toEntity())
+        categoryDao.insert(category.toEntity().copy(userId = currentUserProvider.uid))
 
     override suspend fun update(category: Category) =
-        categoryDao.update(category.toEntity())
+        categoryDao.update(category.toEntity().copy(userId = currentUserProvider.uid))
 
     override suspend fun delete(id: Long) {
         val entity = categoryDao.getById(id) ?: return
@@ -37,5 +39,5 @@ class CategoryRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getTransactionCount(categoryId: Long): Int =
-        categoryDao.getTransactionCount(categoryId)
+        categoryDao.getTransactionCount(currentUserProvider.uid, categoryId)
 }

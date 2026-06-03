@@ -13,17 +13,17 @@ import java.time.LocalDate
 @Dao
 interface RecurringTransactionDao {
 
-    @Query("SELECT * FROM recurring_transactions ORDER BY id ASC")
-    fun observeAll(): Flow<List<RecurringTransactionEntity>>
+    @Query("SELECT * FROM recurring_transactions WHERE userId = :userId ORDER BY id ASC")
+    fun observeAll(userId: String): Flow<List<RecurringTransactionEntity>>
 
-    @Query("SELECT * FROM recurring_transactions WHERE isActive = 1 ORDER BY nextOccurrence ASC")
-    fun observeActive(): Flow<List<RecurringTransactionEntity>>
+    @Query("SELECT * FROM recurring_transactions WHERE userId = :userId AND isActive = 1 ORDER BY nextOccurrence ASC")
+    fun observeActive(userId: String): Flow<List<RecurringTransactionEntity>>
 
     @Query("""
         SELECT * FROM recurring_transactions
-        WHERE isActive = 1 AND nextOccurrence <= :asOfDate
+        WHERE userId = :userId AND isActive = 1 AND nextOccurrence <= :asOfDate
     """)
-    suspend fun getDueRecurringTransactions(asOfDate: LocalDate): List<RecurringTransactionEntity>
+    suspend fun getDueRecurringTransactions(userId: String, asOfDate: LocalDate): List<RecurringTransactionEntity>
 
     @Query("SELECT * FROM recurring_transactions WHERE id = :id")
     suspend fun getById(id: Long): RecurringTransactionEntity?

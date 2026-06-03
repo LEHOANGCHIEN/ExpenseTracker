@@ -13,14 +13,17 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface CategoryDao {
 
-    @Query("SELECT * FROM categories ORDER BY isDefault DESC, name ASC")
-    fun observeAll(): Flow<List<CategoryEntity>>
+    @Query("SELECT * FROM categories WHERE userId = :userId ORDER BY isDefault DESC, name ASC")
+    fun observeAll(userId: String): Flow<List<CategoryEntity>>
 
-    @Query("SELECT * FROM categories WHERE type = :type AND isArchived = 0 ORDER BY isDefault DESC, name ASC")
-    fun observeByType(type: TransactionType): Flow<List<CategoryEntity>>
+    @Query("SELECT * FROM categories WHERE userId = :userId AND type = :type AND isArchived = 0 ORDER BY isDefault DESC, name ASC")
+    fun observeByType(userId: String, type: TransactionType): Flow<List<CategoryEntity>>
 
     @Query("SELECT * FROM categories WHERE id = :id")
     suspend fun getById(id: Long): CategoryEntity?
+
+    @Query("SELECT COUNT(*) FROM categories WHERE userId = :userId")
+    suspend fun countByUserId(userId: String): Int
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(category: CategoryEntity): Long
@@ -34,6 +37,6 @@ interface CategoryDao {
     @Delete
     suspend fun delete(category: CategoryEntity)
 
-    @Query("SELECT COUNT(*) FROM transactions WHERE categoryId = :categoryId")
-    suspend fun getTransactionCount(categoryId: Long): Int
+    @Query("SELECT COUNT(*) FROM transactions WHERE userId = :userId AND categoryId = :categoryId")
+    suspend fun getTransactionCount(userId: String, categoryId: Long): Int
 }

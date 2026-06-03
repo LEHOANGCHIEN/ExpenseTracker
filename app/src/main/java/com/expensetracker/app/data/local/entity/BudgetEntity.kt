@@ -17,10 +17,11 @@ import java.time.LocalDate
             onDelete = ForeignKey.CASCADE,
         ),
     ],
-    indices = [Index("categoryId")],
+    indices = [Index("userId"), Index("categoryId")],
 )
 data class BudgetEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val userId: String = "",
     val categoryId: Long?,
     val amount: Double,
     val period: BudgetPeriod,

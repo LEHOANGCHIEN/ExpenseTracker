@@ -10,7 +10,6 @@ import com.expensetracker.app.data.local.dao.RecurringTransactionDao
 import com.expensetracker.app.data.local.dao.TransactionDao
 import com.expensetracker.app.data.local.dao.WalletDao
 import com.expensetracker.app.data.local.database.AppDatabase
-import com.expensetracker.app.data.local.database.DatabaseSeeder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -30,7 +29,6 @@ object DatabaseModule {
             AppDatabase::class.java,
             "expense_tracker.db",
         )
-            .addCallback(DatabaseSeeder.callback())
             .fallbackToDestructiveMigration(dropAllTables = true)
             .build()
 

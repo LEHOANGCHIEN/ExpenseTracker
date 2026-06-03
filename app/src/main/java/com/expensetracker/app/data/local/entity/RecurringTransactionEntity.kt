@@ -24,10 +24,11 @@ import java.time.LocalDate
             onDelete = ForeignKey.RESTRICT,
         ),
     ],
-    indices = [Index("walletId"), Index("categoryId")],
+    indices = [Index("userId"), Index("walletId"), Index("categoryId")],
 )
 data class RecurringTransactionEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val userId: String = "",
     val walletId: Long,
     val categoryId: Long,
     val amount: Double,

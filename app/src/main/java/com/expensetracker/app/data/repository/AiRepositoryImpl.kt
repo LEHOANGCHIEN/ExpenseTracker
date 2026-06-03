@@ -1,5 +1,6 @@
 package com.expensetracker.app.data.repository
 
+import com.expensetracker.app.data.local.CurrentUserProvider
 import com.expensetracker.app.data.local.dao.AiChatMessageDao
 import com.expensetracker.app.data.local.dao.AiInsightDao
 import com.expensetracker.app.data.mapper.toDomain
@@ -36,30 +37,33 @@ class AiRepositoryImpl @Inject constructor(
     private val aiChatMessageDao: AiChatMessageDao,
     private val aiInsightDao: AiInsightDao,
     private val geminiApiService: GeminiApiService,
+    private val currentUserProvider: CurrentUserProvider,
 ) : AiRepository {
 
     private val lenientJson = Json { ignoreUnknownKeys = true; isLenient = true }
 
     override fun observeChatMessages(sessionId: String): Flow<List<AiChatMessage>> =
-        aiChatMessageDao.observeBySession(sessionId).map { list -> list.map { it.toDomain() } }
+        aiChatMessageDao.observeBySession(currentUserProvider.uid, sessionId).map { list -> list.map { it.toDomain() } }
 
     override fun observeUndismissedInsights(): Flow<List<AiInsight>> =
-        aiInsightDao.observeUndismissed().map { list -> list.map { it.toDomain() } }
+        aiInsightDao.observeUndismissed(currentUserProvider.uid).map { list -> list.map { it.toDomain() } }
 
     override suspend fun saveChatMessage(message: AiChatMessage): Long =
-        aiChatMessageDao.insert(message.toEntity())
+        aiChatMessageDao.insert(message.toEntity().copy(userId = currentUserProvider.uid))
 
     override suspend fun clearSession(sessionId: String) =
-        aiChatMessageDao.deleteSession(sessionId)
+        aiChatMessageDao.deleteSession(currentUserProvider.uid, sessionId)
 
     override suspend fun getLatestSessionId(): String? =
-        aiChatMessageDao.getLatestSessionId()
+        aiChatMessageDao.getLatestSessionId(currentUserProvider.uid)
 
     override suspend fun dismissInsight(id: Long) =
         aiInsightDao.dismiss(id)
 
-    override suspend fun saveInsights(insights: List<AiInsight>) =
-        aiInsightDao.insertAll(insights.map { it.toEntity() })
+    override suspend fun saveInsights(insights: List<AiInsight>) {
+        val uid = currentUserProvider.uid
+        aiInsightDao.insertAll(insights.map { it.toEntity().copy(userId = uid) })
+    }
 
     override suspend fun sendChatMessage(
         history: List<AiChatMessage>,
@@ -156,7 +160,6 @@ class AiRepositoryImpl @Inject constructor(
 
         return geminiApiService.generateJson(systemInstruction = prompt).mapCatching { json ->
             val raw = json.trim()
-            // Response may be a bare array or wrapped in {"insights":[...]}
             val arrayJson = if (raw.startsWith("[")) {
                 raw
             } else {

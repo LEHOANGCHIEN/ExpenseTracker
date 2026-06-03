@@ -6,12 +6,16 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.expensetracker.app.core.designsystem.theme.ExpenseTrackerTheme
 import com.expensetracker.app.core.util.LocaleHelper
+import com.expensetracker.app.domain.repository.AuthRepository
 import com.expensetracker.app.domain.repository.PreferencesRepository
 import com.expensetracker.app.feature.shell.AppShell
+import com.expensetracker.app.navigation.AuthNavHost
 import com.expensetracker.app.navigation.Home
 import com.expensetracker.app.navigation.Onboarding
 import dagger.hilt.android.AndroidEntryPoint
@@ -22,6 +26,9 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var preferencesRepository: PreferencesRepository
+
+    @Inject
+    lateinit var authRepository: AuthRepository
 
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(LocaleHelper.applyLocale(newBase))
@@ -37,6 +44,9 @@ class MainActivity : ComponentActivity() {
             )
             val prefs = prefsState.value
 
+            val authUser by remember { authRepository.authStateFlow() }
+                .collectAsStateWithLifecycle(initialValue = authRepository.currentUser)
+
             LaunchedEffect(prefs?.language) {
                 prefs?.language?.let { language ->
                     val current = LocaleHelper.getLanguage(this@MainActivity)
@@ -51,8 +61,12 @@ class MainActivity : ComponentActivity() {
                     themeMode = prefs.themeMode,
                     dynamicColor = prefs.dynamicColorEnabled,
                 ) {
-                    val startDestination: Any = if (prefs.hasCompletedOnboarding) Home else Onboarding
-                    AppShell(startDestination = startDestination)
+                    if (authUser == null) {
+                        AuthNavHost()
+                    } else {
+                        val startDestination: Any = if (prefs.hasCompletedOnboarding) Home else Onboarding
+                        AppShell(startDestination = startDestination)
+                    }
                 }
             }
         }

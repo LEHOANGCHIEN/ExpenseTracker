@@ -3,7 +3,7 @@
 # 💰 ExpenseTracker
 
 **A production-grade personal finance Android application**
-built with Jetpack Compose, Clean Architecture, Room, Hilt, and Gemini AI.
+built with Jetpack Compose, Clean Architecture, Room, Hilt, Firebase Auth, and Gemini AI.
 
 [![Android](https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white)](https://developer.android.com)
 [![Kotlin](https://img.shields.io/badge/Language-Kotlin%202.2.10-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org)
@@ -47,6 +47,8 @@ built with Jetpack Compose, Clean Architecture, Room, Hilt, and Gemini AI.
 
 **ExpenseTracker** is a fully-featured personal finance management application for Android. It helps users record income and expenses, manage multiple wallets and budgets, visualize spending patterns through rich analytics, and get AI-powered financial advice — all while working completely offline with an optional cloud AI layer.
 
+User accounts are required: the app uses **Firebase Authentication** (email/password) to identify each user, and all financial data (transactions, wallets, categories, budgets) is fully isolated per account. New users start with seeded default categories and a default wallet.
+
 | Attribute | Value |
 |---|---|
 | **Application ID** | `com.expensetracker.app` |
@@ -58,7 +60,7 @@ built with Jetpack Compose, Clean Architecture, Room, Hilt, and Gemini AI.
 | **UI Toolkit** | Jetpack Compose (BOM 2024.12.01) |
 | **Build System** | Gradle 9.1.1 with KSP 2.2.10-2.0.2 |
 
-The application is entirely written in Kotlin with a modern Android tech stack. All core functionality — transaction recording, budget management, statistics, and recurring transactions — works **fully offline**. AI chat, receipt parsing, and monthly insight generation are powered by **Google Gemini 2.5 Flash** and require an internet connection and a Gemini API key.
+The application is entirely written in Kotlin with a modern Android tech stack. All core functionality — transaction recording, budget management, statistics, and recurring transactions — works **fully offline**. Authentication (sign-in, sign-up, password reset) requires an internet connection. AI chat, receipt parsing, and monthly insight generation are powered by **Google Gemini 2.5 Flash** and require an internet connection and a Gemini API key.
 
 </details>
 
@@ -81,13 +83,21 @@ Managing personal finances is a universal need, yet most people fail to track th
 
 **Recurring expenses are forgotten.** The WorkManager-powered scheduler automatically creates recurring transactions (subscriptions, rent, salaries) on their due dates, even when the app is closed.
 
-**Language barrier.** Vietnamese users often find financial apps in English confusing. ExpenseTracker supports full Vietnamese localization including all strings, currency formatting (VND), and date conventions.
+**Language barrier.** Vietnamese users often find financial apps in English confusing. ExpenseTracker defaults to Vietnamese on first launch, with full English localization also available and switchable at any time.
+
+**Data security.** Each user account's financial data is fully isolated from all other users, so personal spending history is never shared across accounts on the same device.
 
 </details>
 
 
 <details>
 <summary><h2 style="display:inline">3. Key Features</h2></summary>
+
+### Authentication
+- ✅ **Email/password sign-up and sign-in** — Firebase Authentication
+- ✅ **Forgot password** — Firebase password reset email flow
+- ✅ **Per-user data isolation** — every table is scoped by `userId`; switching accounts shows only that account's data
+- ✅ **New-user bootstrap** — default categories (14) and a default wallet (Cash) are seeded for each new account on first sign-in
 
 ### Core Finance Management
 - ✅ **Multi-wallet support** — separate wallets for cash, bank accounts, e-wallets
@@ -115,7 +125,7 @@ Managing personal finances is a universal need, yet most people fail to track th
 ### UX & Platform
 - ✅ **Material Design 3** with dynamic color (Material You) on Android 12+
 - ✅ **Dark / Light / System theme** selector
-- ✅ **Full Vietnamese localization** — all 243 strings translated
+- ✅ **Full Vietnamese localization** — all strings translated; Vietnamese is the default language on first launch
 - ✅ **Animated skeleton loading** (shimmer effect) and Lottie animations
 - ✅ **Animated amount transitions** when balances change
 - ✅ **4 notification channels** — budget alerts, daily reminders, recurring transactions, AI insights
@@ -130,6 +140,16 @@ Managing personal finances is a universal need, yet most people fail to track th
 
 <details>
 <summary><h2 style="display:inline">4. Application Screens</h2></summary>
+
+### Authentication Screens (pre-login)
+
+| Screen | Description |
+|---|---|
+| `LoginScreen` | Email + password fields with show/hide toggle, "Forgot password?" link, and a link to Register |
+| `RegisterScreen` | Email, password, and confirm-password fields; validates password match and format |
+| `ForgotPasswordScreen` | Email input with Firebase password reset email dispatch; shows confirmation on success |
+
+These screens are shown before the user is authenticated. After sign-in or sign-up, the user is navigated to the main app automatically. The auth flow is managed by a separate `AuthNavHost` with its own back stack, so the Back button on Login exits the app rather than returning to a previous screen.
 
 ### Bottom Navigation (4 Main Tabs)
 
@@ -162,7 +182,7 @@ Managing personal finances is a universal need, yet most people fail to track th
 
 ### Other Screens
 - **`ReceiptScannerScreen`** — CameraX live preview with capture, OCR processing, and Gemini parsing fallback
-- **`SettingsScreen`** — Theme, language, currency, notifications, default wallet, Gemini API key override
+- **`SettingsScreen`** — Account section (signed-in email + Sign Out button), theme, language, currency, notifications, default wallet, Gemini API key override
 - **`OnboardingScreen`** — Welcome slides introducing core features
 - **`GeminiTestScreen`** — Developer tool to verify API key connectivity
 
@@ -189,11 +209,13 @@ ExpenseTracker follows **Clean Architecture** with a strict three-layer separati
 │                       DOMAIN LAYER                              │
 │      Repository Interfaces · Domain Models · Business Logic     │
 │      Pure Kotlin · No Android dependencies                      │
+│      Includes: AuthRepository · AuthUser · AuthException        │
 └───────────────────────────┬─────────────────────────────────────┘
                             │ implemented by
 ┌───────────────────────────▼─────────────────────────────────────┐
 │                        DATA LAYER                               │
-│  Room DB · DataStore · Gemini API · ML Kit · WorkManager        │
+│  Room DB · DataStore · Firebase Auth · Gemini API · ML Kit     │
+│  WorkManager · CurrentUserProvider · UserBootstrapService       │
 │  Repository Impls · Mappers · DAOs · DTOs · Workers             │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -214,22 +236,30 @@ Repository Interface (domain boundary)
     │
     ▼
 Repository Implementation (data layer)
+    │             │             │
+    ▼             ▼             ▼
+Room DAO    Firebase Auth   Gemini API / ML Kit
     │             │
-    ▼             ▼
-Room DAO     Gemini API / ML Kit
-    │
-    ▼
-Flow<Entity>
-    │
-    ▼ (mapper)
-Flow<DomainModel>
-    │
-    ▼
+    ▼             ▼ (auth state change)
+Flow<Entity>  Flow<AuthUser?>
+    │             │
+    ▼ (mapper)    ▼
+Flow<DomainModel> ─────────────────┐
+    │                              │
+    ▼                              ▼
 ViewModel (updates StateFlow<UiState>)
     │
     ▼
 Composable re-renders
 ```
+
+### Authentication Gate
+
+`MainActivity` observes `AuthRepository.authStateFlow()`. When `authUser == null` (not signed in), it renders `AuthNavHost` (Login → Register → ForgotPassword). When `authUser != null`, it renders `AppShell` (main app with bottom navigation). This switch is driven entirely by reactive state — no explicit navigation calls are needed on sign-in or sign-out.
+
+### Per-User Data Scoping
+
+Every DAO query that reads data accepts a `userId: String` parameter. `CurrentUserProvider` (a `@Singleton` bound to `AuthRepository.currentUser?.uid`) supplies the current user's UID to every repository. All inserts stamp `userId = currentUserProvider.uid` on the entity. When no user is signed in, `uid` is `""` and all queries return empty results.
 
 ### ViewModel State Pattern
 
@@ -275,7 +305,7 @@ class SomeViewModel @Inject constructor(...) : ViewModel() {
 | Material Icons Extended | via BOM | Icon library |
 | Lottie Compose | 6.6.0 | Vector animations |
 | Coil 3 | 3.0.4 | Async image loading |
-| Vico Charts | 2.0.0-M3 | Bar, line, and custom charts |
+| Vico Charts | 2.0.0 | Bar, line, and custom charts |
 | Accompanist Permissions | 0.36.0 | Runtime permission helpers |
 
 ### Navigation
@@ -289,6 +319,15 @@ class SomeViewModel @Inject constructor(...) : ViewModel() {
 | Hilt Android | 2.59.2 | Full DI framework for Android |
 | Hilt Navigation Compose | 1.3.0 | ViewModel injection in composables |
 | Hilt Work | 1.3.0 | Worker injection |
+
+### Authentication & Cloud
+| Technology | Version | Purpose |
+|---|---|---|
+| Firebase BOM | 34.14.0 | Firebase version management |
+| Firebase Auth | via BOM | Email/password authentication |
+| Firebase Firestore | via BOM | Cloud database (dependency in place) |
+| Google Services Gradle Plugin | 4.4.4 | Processes `google-services.json` |
+| kotlinx-coroutines-play-services | 1.9.0 | `await()` extension for Firebase Tasks |
 
 ### Data Persistence
 | Technology | Version | Purpose |
@@ -353,14 +392,17 @@ ExpenseTracker/
 │   │   │   │       ├── CurrencyFormatter.kt
 │   │   │   │       ├── DateUtils.kt
 │   │   │   │       ├── Extensions.kt
-│   │   │   │       └── LocaleHelper.kt
+│   │   │   │       └── LocaleHelper.kt        # Startup locale (defaults to "vi")
 │   │   │   │
 │   │   │   ├── data/                          # Data layer implementations
+│   │   │   │   ├── bootstrap/
+│   │   │   │   │   └── UserBootstrapService.kt  # Seeds default data per new user
 │   │   │   │   ├── local/
-│   │   │   │   │   ├── dao/                   # 7 DAO interfaces
-│   │   │   │   │   ├── database/              # AppDatabase + Seeder
+│   │   │   │   │   ├── CurrentUserProvider.kt  # Supplies uid to all repositories
+│   │   │   │   │   ├── dao/                   # 7 DAO interfaces (all userId-scoped)
+│   │   │   │   │   ├── database/              # AppDatabase (version 3) + Seeder
 │   │   │   │   │   ├── datastore/             # UserPreferencesDataStore
-│   │   │   │   │   └── entity/                # 7 Room entities
+│   │   │   │   │   └── entity/                # 7 Room entities (all have userId)
 │   │   │   │   ├── remote/gemini/
 │   │   │   │   │   ├── GeminiApiService.kt    # Model config, request methods
 │   │   │   │   │   ├── GeminiModels.kt        # Request/Response DTOs
@@ -368,8 +410,9 @@ ExpenseTracker/
 │   │   │   │   ├── mlkit/
 │   │   │   │   │   ├── ReceiptOcrService.kt   # ML Kit text recognition
 │   │   │   │   │   └── ReceiptParser.kt       # Multi-pass receipt parser
-│   │   │   │   ├── mapper/                    # 6 Entity ↔ Domain mappers
-│   │   │   │   ├── repository/                # 7 repository implementations
+│   │   │   │   ├── mapper/                    # 7 Entity ↔ Domain mappers
+│   │   │   │   ├── repository/                # 8 repository implementations
+│   │   │   │   │   └── AuthRepositoryImpl.kt  # Firebase Auth + UserBootstrapService
 │   │   │   │   ├── worker/                    # 4 WorkManager workers
 │   │   │   │   ├── budget/
 │   │   │   │   │   └── BudgetAlertChecker.kt
@@ -377,16 +420,27 @@ ExpenseTracker/
 │   │   │   │       └── BackupService.kt       # JSON export/import
 │   │   │   │
 │   │   │   ├── domain/                        # Business rules (pure Kotlin)
-│   │   │   │   ├── model/                     # 20 domain models and enums
-│   │   │   │   └── repository/                # 7 repository interfaces
+│   │   │   │   ├── model/                     # 22 domain models and enums
+│   │   │   │   │   ├── AuthUser.kt            # uid + email
+│   │   │   │   │   └── AuthException.kt       # Sealed class: typed auth errors
+│   │   │   │   └── repository/                # 8 repository interfaces
+│   │   │   │       └── AuthRepository.kt      # signIn/signUp/signOut/resetPassword
 │   │   │   │
 │   │   │   ├── di/                            # Hilt modules
+│   │   │   │   ├── AuthModule.kt              # FirebaseAuth + CurrentUserProvider
 │   │   │   │   ├── DatabaseModule.kt          # Room + all DAOs
 │   │   │   │   ├── DataStoreModule.kt         # DataStore singleton
 │   │   │   │   ├── NetworkModule.kt           # Gemini API service
 │   │   │   │   └── RepositoryModule.kt        # Interface → Impl bindings
 │   │   │   │
 │   │   │   ├── feature/                       # Feature modules
+│   │   │   │   ├── auth/                      # Login · Register · Forgot Password
+│   │   │   │   │   ├── screen/
+│   │   │   │   │   │   ├── LoginScreen.kt
+│   │   │   │   │   │   ├── RegisterScreen.kt
+│   │   │   │   │   │   └── ForgotPasswordScreen.kt
+│   │   │   │   │   └── viewmodel/
+│   │   │   │   │       └── AuthViewModel.kt
 │   │   │   │   ├── home/                      # Dashboard
 │   │   │   │   ├── transaction/               # List + Add/Edit + Detail
 │   │   │   │   ├── category/                  # List + Add/Edit
@@ -396,24 +450,26 @@ ExpenseTracker/
 │   │   │   │   ├── statistics/                # Charts + Analysis
 │   │   │   │   ├── ai_assistant/              # Chat + History
 │   │   │   │   ├── ocr_scan/                  # Camera + OCR
-│   │   │   │   ├── settings/                  # Preferences
+│   │   │   │   ├── settings/                  # Preferences + Sign Out
 │   │   │   │   ├── onboarding/                # First-run flow
 │   │   │   │   └── shell/                     # AppShell + Quick Add
 │   │   │   │
 │   │   │   ├── navigation/
-│   │   │   │   ├── AppNavHost.kt              # Navigation graph
+│   │   │   │   ├── AppNavHost.kt              # Main app navigation graph
+│   │   │   │   ├── AuthNavHost.kt             # Auth flow (Login/Register/ForgotPw)
 │   │   │   │   └── AppDestinations.kt         # Serializable route objects
 │   │   │   │
-│   │   │   ├── MainActivity.kt
+│   │   │   ├── MainActivity.kt                # Auth gate: shows AuthNavHost or AppShell
 │   │   │   └── ExpenseTrackerApp.kt
 │   │   │
 │   │   └── res/
-│   │       ├── values/strings.xml             # 243 English strings
-│   │       ├── values-vi/strings.xml          # 243 Vietnamese strings
+│   │       ├── values/strings.xml             # ~300 English strings
+│   │       ├── values-vi/strings.xml          # ~300 Vietnamese strings
 │   │       ├── values/colors.xml
 │   │       ├── values/themes.xml
 │   │       └── drawable / mipmap              # Icons and assets
 │   │
+│   ├── google-services.json                   # Firebase project config (required)
 │   ├── schemas/                               # Room migration JSON schemas
 │   └── build.gradle.kts                       # Dependencies + build config
 │
@@ -434,20 +490,22 @@ All core functionality works without internet access. Data is stored locally usi
 
 | Feature | Storage |
 |---|---|
-| Transaction CRUD | Room (`transactions` table) |
-| Category management | Room (`categories` table) |
-| Budget tracking | Room (`budgets` table) |
-| Wallet management | Room (`wallets` table) |
+| Transaction CRUD | Room (`transactions` table, scoped by userId) |
+| Category management | Room (`categories` table, scoped by userId) |
+| Budget tracking | Room (`budgets` table, scoped by userId) |
+| Wallet management | Room (`wallets` table, scoped by userId) |
 | Recurring transaction scheduling | Room + WorkManager |
 | Statistics and charts | Computed from local Room queries |
 | User preferences (theme, currency, language) | DataStore |
-| Previously generated AI insights | Room (`ai_insights` table) |
-| Chat message history | Room (`ai_chat_messages` table) |
+| Previously generated AI insights | Room (`ai_insights` table, scoped by userId) |
+| Chat message history | Room (`ai_chat_messages` table, scoped by userId) |
 | Backup export / import | Local file system (JSON) |
 
-### Online Features (Require Gemini API Key)
-| Feature | API |
+### Online Features (Require Internet)
+| Feature | Service |
 |---|---|
+| Sign up / Sign in | Firebase Authentication |
+| Password reset email | Firebase Authentication |
 | AI chat with financial context | Gemini 2.5 Flash |
 | Natural language transaction parsing | Gemini 2.5 Flash (JSON mode) |
 | Transaction auto-categorization | Gemini 2.5 Flash (JSON mode) |
@@ -459,6 +517,7 @@ All core functionality works without internet access. Data is stored locally usi
 - If the API key is missing or invalid, error messages are shown in the AI chat; other screens remain unaffected.
 - OCR falls back to pure ML Kit parsing if Gemini is unavailable.
 - Previously generated AI insights remain accessible from the local database even when offline.
+- All financial data (transactions, budgets, etc.) is readable and writable offline once the user is signed in; the auth token persists across restarts.
 
 </details>
 
@@ -485,7 +544,7 @@ The app configures two separate `GenerativeModel` instances:
    - User's preferred currency
 2. This JSON context is injected as the system prompt via `GeminiPrompts.buildChatSystemPrompt()`.
 3. Full conversation history is sent with each request for multi-turn coherence.
-4. Messages are persisted to Room (`ai_chat_messages` table) with UUID-based session IDs.
+4. Messages are persisted to Room (`ai_chat_messages` table) with UUID-based session IDs, scoped to the current user's `userId`.
 5. The latest session is automatically restored on next app open.
 
 **UI:** Chat bubbles with markdown-aware rendering, typing indicator animation, session management (new chat, clear history).
@@ -517,7 +576,7 @@ The `MonthlyInsightsWorker` runs every 30 days via WorkManager. It:
 1. Aggregates the previous month's transactions by category.
 2. Sends a structured summary to Gemini with `buildMonthlyInsightsPrompt()`.
 3. Receives 2–4 insight items (type, title, content).
-4. Saves them to the `ai_insights` Room table.
+4. Saves them to the `ai_insights` Room table, scoped to the current user's `userId`.
 5. Shows a notification linking to the AI tab.
 
 **Insight types:** `MONTHLY_SUMMARY`, `ANOMALY`, `RECOMMENDATION`
@@ -598,10 +657,10 @@ The `StatisticsScreen` and `StatisticsViewModel` provide comprehensive spending 
 ### Analysis Periods
 | Period | Description |
 |---|---|
+| This Week | Monday → Sunday of the current week |
 | This Month | 1st of current month → today |
 | Last Month | Previous calendar month |
-| This Quarter | Current Q1/Q2/Q3/Q4 |
-| Last Year | Previous full year |
+| This Year | January 1st → December 31st of the current year |
 | Custom Range | User-selected start and end date |
 
 ### Charts and Visualizations
@@ -621,14 +680,14 @@ The `StatisticsScreen` and `StatisticsViewModel` provide comprehensive spending 
 
 **Daily Spend Heatmap**
 - Calendar-grid visualization of daily spending intensity
-- Color gradient from light (low spend) to dark (high spend)
-- Useful for identifying high-spend days or patterns
+- Color gradient from light (low spend) to dark red (high spend)
+- Month heading and weekday initials are locale-aware (Vietnamese when Vi is active)
 
 **Category Breakdown Table**
 - Ranked list of categories with amount, percentage of total, and transaction count
 
 ### Data Aggregation
-All statistics are computed from Room queries using:
+All statistics are computed from Room queries scoped to the current user's `userId`:
 - `getTotalByTypeAndDateRange()` — aggregate income/expense for a period
 - `observeByDateRange()` — per-transaction data for charting
 - `getSumByCategoryAndDateRange()` — category-level breakdowns
@@ -641,31 +700,39 @@ All statistics are computed from Room queries using:
 
 The app supports **English (en)** and **Vietnamese (vi)** with complete parity — every user-visible string has a translation in both languages.
 
+### Default Language
+
+**Vietnamese is the default language on first launch**, regardless of the device's system locale. This applies immediately to the Login, Register, and Forgot Password screens — the very first screens a new user sees. The choice persists in `SharedPreferences` via `LocaleHelper` and survives restarts.
+
 ### String Resource Statistics
 | File | Language | String Count |
 |---|---|---|
-| `res/values/strings.xml` | English | 243 |
-| `res/values-vi/strings.xml` | Vietnamese | 243 |
+| `res/values/strings.xml` | English | ~300 |
+| `res/values-vi/strings.xml` | Vietnamese | ~300 |
 
 ### String Categories Covered
 - Navigation labels and tab names
 - All screen titles and section headers
+- Authentication screens: sign-in, sign-up, forgot password labels and error messages
 - Button labels and action strings (Save, Cancel, Delete, Edit, etc.)
-- Transaction types, categories, budget periods
-- Error messages and validation feedback
+- Transaction types (Income / Chi tiêu, Expense / Chi tiêu, Transfer / Chuyển khoản)
+- Categories, budget periods, filter labels
+- Error messages and validation feedback (including Firebase Auth errors: wrong password, user not found, network error, etc.)
 - Notification titles and body text
 - Onboarding slide content
 - AI assistant prompts and suggestion chips
-- Settings labels and descriptions
+- Settings labels and descriptions (including Account / Tài khoản, Sign Out / Đăng xuất)
 - Receipt scanner status messages
-- Chart and statistics labels
+- Chart and statistics labels (period chips, empty states)
+- Relative date labels (Today / Hôm nay, Yesterday / Hôm qua)
 
 ### Runtime Language Switching
 
-The `LocaleHelper` utility updates the app's `Configuration` at runtime:
-- Language is stored in `UserPreferences.language` (DataStore)
-- On `MainActivity` start, the stored locale is applied before UI rendering
-- Changing language in Settings takes effect on next activity recreation
+The `LocaleHelper` utility stores the selected language in `SharedPreferences` (key `locale_prefs`) and applies it in `attachBaseContext()` before the Activity is inflated — this means the correct locale is applied on the very first frame, including the Login screen.
+
+- On **first launch**, the `SharedPreferences` key is absent. `LocaleHelper.getLanguage()` returns `"vi"` as the default, so Vietnamese is applied immediately.
+- When the user selects English in Settings, `LocaleHelper.setLanguage("en")` writes `"en"` to `SharedPreferences` and `Activity.recreate()` applies the change. That value is read on all subsequent launches.
+- The selected language is also mirrored to `UserPreferencesDataStore` so it can be observed reactively by the Settings screen.
 
 ### Currency Formatting
 
@@ -680,47 +747,64 @@ The `LocaleHelper` utility updates the app's `Configuration` at runtime:
 <details>
 <summary><h2 style="display:inline">13. Database Design</h2></summary>
 
-Room database version **2** with JSON schema export enabled. The database uses `fallbackToDestructiveMigration()` (appropriate for a prototype; production would use explicit migration scripts).
+Room database version **3** with JSON schema export enabled. The database uses `fallbackToDestructiveMigration(dropAllTables = true)` — appropriate for a student project where intentional fresh-start semantics align with the per-user data model.
+
+> **Version history:** v1 → initial schema; v2 → minor additions; v3 → added `userId TEXT NOT NULL DEFAULT ''` column to all seven user-owned tables, with a corresponding index on each, to support per-user data isolation.
+
+### Per-User Data Isolation
+
+Every user-owned table has a `userId TEXT NOT NULL DEFAULT ''` column. All DAO read queries are filtered by `WHERE userId = :userId`. All insert/update operations stamp the current user's Firebase UID via `CurrentUserProvider`. When no user is signed in, the UID is `""` and all queries return empty results — no data leaks between accounts.
+
+### New-User Bootstrap
+
+When a user signs in or registers for the first time, `UserBootstrapService.bootstrapIfNeeded(uid)` checks `categoryDao.countByUserId(uid)`. If zero categories exist for that UID, it inserts:
+- **14 default categories** (10 expense: Ăn uống, Di chuyển, Mua sắm, …; 4 income: Lương, Thưởng, Đầu tư, Thu nhập khác)
+- **1 default wallet**: "Cash" (💵, #26A69A, 0 VND)
+
+All seeded rows are stamped with the user's Firebase UID. This runs once per user, and is idempotent.
 
 ### Entity Relationship Diagram
 
 ```
-┌──────────────┐       ┌───────────────────┐       ┌──────────────┐
-│   wallets    │       │    transactions   │       │  categories  │
-├──────────────┤       ├───────────────────┤       ├──────────────┤
-│ id (PK)      │──────▶│ walletId (FK)     │◀──────│ id (PK)      │
-│ name         │       │ id (PK)           │       │ name         │
-│ icon         │       │ categoryId (FK)   │       │ icon         │
-│ color        │       │ amount            │       │ color        │
-│ initialBal   │       │ type (ENUM)       │       │ type (ENUM)  │
-│ currency     │       │ note              │       │ isDefault    │
-│ createdAt    │       │ date              │       │ isArchived   │
-└──────────────┘       │ photoUri          │       └──────────────┘
-                       │ location          │
-┌──────────────┐       │ recurringId (FK)  │       ┌──────────────┐
-│   budgets    │       │ parentSplitId(FK) │       │  recurring_  │
-├──────────────┤       │ tags              │       │ transactions │
-│ id (PK)      │       │ toWalletId (FK)   │       ├──────────────┤
-│ categoryId(FK├───┐   │ createdAt         │  ┌───▶│ id (PK)      │
-│ amount       │   │   │ updatedAt         │  │    │ walletId (FK)│
-│ period(ENUM) │   │   └───────────────────┘  │    │ categoryId(FK│
-│ startDate    │   │                           │    │ amount       │
-│ endDate      │   └──── categories.id ────────┘    │ type (ENUM)  │
-│ alertThresh  │                                    │ frequency    │
-│ isActive     │   ┌───────────────────┐            │ interval     │
-└──────────────┘   │  ai_chat_messages │            │ startDate    │
-                   ├───────────────────┤            │ endDate      │
-┌──────────────┐   │ id (PK)           │            │ nextOccur.   │
-│  ai_insights │   │ role (ENUM)       │            │ lastProc.    │
-├──────────────┤   │ content           │            │ isActive     │
-│ id (PK)      │   │ timestamp         │            └──────────────┘
-│ type (ENUM)  │   │ sessionId         │
-│ title        │   └───────────────────┘
-│ content      │
-│ periodKey    │
-│ generatedAt  │
-│ dismissed    │
-└──────────────┘
+┌──────────────────┐       ┌──────────────────────┐       ┌────────────────┐
+│     wallets      │       │     transactions     │       │   categories   │
+├──────────────────┤       ├──────────────────────┤       ├────────────────┤
+│ id (PK)          │──────▶│ walletId (FK)        │◀──────│ id (PK)        │
+│ userId           │       │ id (PK)              │       │ userId         │
+│ name             │       │ userId               │       │ name           │
+│ icon             │       │ categoryId (FK)      │       │ icon           │
+│ color            │       │ amount               │       │ color          │
+│ initialBal       │       │ type (ENUM)          │       │ type (ENUM)    │
+│ currency         │       │ note                 │       │ isDefault      │
+│ createdAt        │       │ date                 │       │ isArchived     │
+└──────────────────┘       │ photoUri             │       └────────────────┘
+                           │ location             │
+┌──────────────────┐       │ recurringId (FK)     │       ┌──────────────────┐
+│     budgets      │       │ parentSplitId (FK)   │       │   recurring_     │
+├──────────────────┤       │ tags                 │       │  transactions    │
+│ id (PK)          │       │ toWalletId (FK)      │       ├──────────────────┤
+│ userId           │       │ createdAt            │  ┌───▶│ id (PK)          │
+│ categoryId (FK)  │       │ updatedAt            │  │    │ userId           │
+│ amount           │       └──────────────────────┘  │    │ walletId (FK)    │
+│ period (ENUM)    │                                  │    │ categoryId (FK)  │
+│ startDate        │                                  │    │ amount           │
+│ endDate          │                                  │    │ type (ENUM)      │
+│ alertThresh      │                                  │    │ frequency        │
+│ isActive         │                                  │    │ interval         │
+└──────────────────┘                                  │    │ startDate        │
+                                                      │    │ endDate          │
+┌──────────────────┐   ┌──────────────────────┐       │    │ nextOccur.       │
+│   ai_insights    │   │   ai_chat_messages   │       │    │ lastProc.        │
+├──────────────────┤   ├──────────────────────┤       │    │ isActive         │
+│ id (PK)          │   │ id (PK)              │       │    └──────────────────┘
+│ userId           │   │ userId               │       │
+│ type (ENUM)      │   │ role (ENUM)          │       │
+│ title            │   │ content              │       │
+│ content          │   │ timestamp            │       │
+│ periodKey        │   │ sessionId            │       │
+│ generatedAt      │   └──────────────────────┘       │
+│ dismissed        │                                  │
+└──────────────────┘   recurring_transactions.id ─────┘
 ```
 
 ### TypeConverters
@@ -731,19 +815,19 @@ Room uses custom `TypeConverters` for:
 
 ### Indexes
 ```sql
--- transactions table
+-- All tables
+INDEX(userId)                                -- per-user filtering on every table
+
+-- transactions
 INDEX(walletId), INDEX(categoryId), INDEX(date),
 INDEX(recurringId), INDEX(parentSplitId)
 
--- budgets table
+-- budgets
 INDEX(categoryId)
 
--- recurring_transactions table
+-- recurring_transactions
 INDEX(walletId), INDEX(categoryId)
 ```
-
-### Database Seeder
-On first install, a `RoomDatabase.Callback` seeds default categories (Food, Transport, Shopping, Entertainment, etc.) with Vietnamese and English names, icons, and colors so the app is immediately usable.
 
 </details>
 
@@ -759,20 +843,30 @@ Every screen has a corresponding ViewModel that:
 - The composable only renders state and fires events
 
 ### Clean Architecture (3-Layer)
-- **Domain layer:** Pure Kotlin interfaces and models — zero Android imports
-- **Data layer:** Room, DataStore, Gemini, ML Kit, WorkManager implementations
-- **Presentation layer:** Composables and ViewModels — depends only on domain interfaces
+- **Domain layer:** Pure Kotlin interfaces and models — zero Android imports. Includes `AuthRepository`, `AuthUser`, and the `AuthException` sealed class.
+- **Data layer:** Room, DataStore, Firebase Auth, Gemini, ML Kit, WorkManager implementations.
+- **Presentation layer:** Composables and ViewModels — depends only on domain interfaces.
 
 ### Repository Pattern
-Seven repository interfaces decouple the presentation and domain layers from data sources. Implementations in the data layer can be swapped without touching ViewModel code.
+Eight repository interfaces decouple the presentation and domain layers from data sources:
+`TransactionRepository`, `WalletRepository`, `CategoryRepository`, `BudgetRepository`, `RecurringTransactionRepository`, `AiRepository`, `PreferencesRepository`, `AuthRepository`.
+
+### Authentication and Auth Gate Pattern
+`AuthRepository` (interface) / `AuthRepositoryImpl` (Firebase Auth) is injected into `AuthViewModel` for the auth screens and into `MainActivity` for the auth gate. The gate is purely reactive: `MainActivity` collects `authRepository.authStateFlow()` as a `State<AuthUser?>`, and the Compose tree conditionally renders either `AuthNavHost` or `AppShell` with no imperative navigation calls. Signing out triggers `FirebaseAuth.signOut()`, which emits `null` on the auth state flow, which causes `MainActivity` to recompose and display the Login screen automatically.
+
+### Per-User Data Scoping
+`CurrentUserProvider` (a `@Singleton`) reads `AuthRepository.currentUser?.uid`, returning `""` when not signed in. All eight data repositories inject this provider. Every DAO SELECT query is filtered by `userId = :userId`; every INSERT/UPDATE stamps `userId = currentUserProvider.uid`. This pattern ensures data isolation without requiring any UI-layer changes.
+
+### Error Typing (Auth)
+`AuthException` is a sealed Kotlin class (pure domain model, no Android dependency) with subclasses for each Firebase error category (`WeakPassword`, `EmailAlreadyInUse`, `WrongPassword`, `InvalidEmail`, `UserNotFound`, `NetworkError`, etc.). `AuthRepositoryImpl` maps Firebase exceptions to these typed errors. `AuthViewModel` injects `@ApplicationContext` and maps each subtype to a localized string via `context.getString(R.string.auth_error_*)`. This ensures error messages are always in the user's selected language, regardless of what Firebase returns.
 
 ### Dependency Injection (Hilt)
 All dependencies are injected via constructor injection:
 - `@HiltAndroidApp` on `Application`
 - `@AndroidEntryPoint` on `Activity`
 - `@HiltViewModel` on all ViewModels
-- `@Singleton` for database, DataStore, and API service instances
-- `@Binds` for interface-to-implementation wiring
+- `@Singleton` for database, DataStore, Firebase Auth, and API service instances
+- `@Binds` for interface-to-implementation wiring (including `AuthRepository → AuthRepositoryImpl` and `CurrentUserProvider → CurrentUserProviderImpl`)
 
 ### Observer Pattern (Flow + Compose)
 Room DAOs return `Flow<T>`. Repositories expose `Flow<DomainModel>`. ViewModels call `collectAsStateWithLifecycle()` to auto-cancel observation when the composable leaves the composition. This creates a live, reactive data pipeline from the database to the UI.
@@ -795,6 +889,11 @@ data class AddEditTransaction(
     val prefillNote: String? = null,
     val prefillCategoryId: Long? = null,
 )
+
+// Auth routes
+@Serializable data object Login
+@Serializable data object Register
+@Serializable data class ForgotPassword(val prefillEmail: String = "")
 ```
 
 </details>
@@ -827,7 +926,11 @@ data class AddEditTransaction(
 | `androidx.hilt:hilt-work` | 1.3.0 | Hilt + WorkManager |
 | `androidx.datastore:datastore-preferences` | 1.1.1 | Async preferences |
 | `org.jetbrains.kotlinx:kotlinx-coroutines-android` | 1.9.0 | Coroutines |
+| `org.jetbrains.kotlinx:kotlinx-coroutines-play-services` | 1.9.0 | Firebase `await()` extension |
 | `org.jetbrains.kotlinx:kotlinx-serialization-json` | 1.7.3 | JSON serialization |
+| **`com.google.firebase:firebase-bom`** | **34.14.0** | **Firebase version management** |
+| **`com.google.firebase:firebase-auth`** | **via BOM** | **Email/password authentication** |
+| **`com.google.firebase:firebase-firestore`** | **via BOM** | **Cloud database (dependency in place)** |
 | `com.google.ai.client.generativeai:generativeai` | 0.9.0 | Gemini AI SDK |
 | `com.google.mlkit:text-recognition` | 16.0.1 | On-device OCR |
 | `androidx.camera:camera-camera2` | 1.4.2 | Camera hardware |
@@ -838,6 +941,17 @@ data class AddEditTransaction(
 | `com.airbnb.android:lottie-compose` | 6.6.0 | Lottie animations |
 | `androidx.work:work-runtime-ktx` | 2.9.1 | WorkManager |
 | `com.google.accompanist:accompanist-permissions` | 0.36.0 | Runtime permissions |
+
+### Gradle Plugins Applied
+
+| Plugin | Version | Where |
+|---|---|---|
+| `com.android.application` | 9.1.1 (AGP) | `app/build.gradle.kts` |
+| `org.jetbrains.kotlin.plugin.compose` | 2.2.10 | `app/build.gradle.kts` |
+| `org.jetbrains.kotlin.plugin.serialization` | 2.2.10 | `app/build.gradle.kts` |
+| `com.google.devtools.ksp` | 2.2.10-2.0.2 | `app/build.gradle.kts` |
+| `com.google.dagger.hilt.android` | 2.59.2 | `app/build.gradle.kts` |
+| **`com.google.gms.google-services`** | **4.4.4** | **`app/build.gradle.kts`** |
 
 </details>
 
@@ -851,6 +965,7 @@ data class AddEditTransaction(
 - **JDK 17** or newer — AGP 9.x and Gradle 9.x require JDK 17 to run builds. The `compileOptions { sourceCompatibility = JavaVersion.VERSION_11 }` in `app/build.gradle.kts` sets the bytecode *target*, not the toolchain version.
 - **Android device or emulator** running Android 8.0 (API 26) or higher
 - **Gemini API key** (free tier available at [Google AI Studio](https://aistudio.google.com)) — required only for AI features
+- **Firebase project with `google-services.json`** — required for authentication; see Step 2b below
 
 ### Step 1: Clone the Repository
 
@@ -859,7 +974,7 @@ git clone <repository-url>
 cd ExpenseTracker
 ```
 
-### Step 2: Configure the API Key
+### Step 2a: Configure the Gemini API Key
 
 Create or edit `local.properties` in the project root:
 
@@ -869,6 +984,18 @@ GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
 > The `GEMINI_API_KEY` is injected at compile time via `BuildConfig`. Without it, all AI features will be disabled. The rest of the app works without a key.
+
+### Step 2b: Configure Firebase
+
+The app requires a valid `google-services.json` to compile. The file is not committed to the repository. To obtain one:
+
+1. Go to the [Firebase Console](https://console.firebase.google.com) and create a project (or use an existing one).
+2. Add an Android app with package name `com.expensetracker.app`.
+3. Download the generated `google-services.json` file.
+4. Place it at `app/google-services.json` (alongside `app/build.gradle.kts`).
+5. In the Firebase Console, enable **Authentication → Sign-in method → Email/Password**.
+
+> Without `google-services.json`, the Google Services Gradle plugin will fail at build time. No SHA-1 fingerprint or Google Sign-In setup is required.
 
 ### Step 3: Open in Android Studio
 
@@ -932,8 +1059,9 @@ The commands below will execute those stubs successfully but do not verify any a
 ### Known Build Notes
 
 - The project uses `android.disallowKotlinSourceSets=false` in `gradle.properties` — this is intentional for KSP compatibility with the current AGP version.
-- `org.jetbrains.kotlin.android` is **not applied anywhere**. AGP 9.x has built-in Kotlin support, so that plugin is obsolete and replaced by the dedicated `org.jetbrains.kotlin.plugin.compose` and `org.jetbrains.kotlin.plugin.serialization` plugins. The five plugins actually applied in `app/build.gradle.kts` are: `com.android.application`, `org.jetbrains.kotlin.plugin.compose`, `org.jetbrains.kotlin.plugin.serialization`, `com.google.devtools.ksp`, and `com.google.dagger.hilt.android`.
+- `org.jetbrains.kotlin.android` is **not applied anywhere**. AGP 9.x has built-in Kotlin support, so that plugin is obsolete and replaced by the dedicated `org.jetbrains.kotlin.plugin.compose` and `org.jetbrains.kotlin.plugin.serialization` plugins. The six plugins actually applied in `app/build.gradle.kts` are: `com.android.application`, `org.jetbrains.kotlin.plugin.compose`, `org.jetbrains.kotlin.plugin.serialization`, `com.google.devtools.ksp`, `com.google.dagger.hilt.android`, and `com.google.gms.google-services`.
 - Room schema files are exported to `app/schemas/` — include this directory in version control to track database migrations.
+- A valid `google-services.json` must be present at `app/google-services.json` before building; the Google Services plugin will fail at configuration time if it is missing.
 
 </details>
 
@@ -942,7 +1070,7 @@ The commands below will execute those stubs successfully but do not verify any a
 <summary><h2 style="display:inline">18. Future Improvements</h2></summary>
 
 ### High Priority
-- **Cloud sync** — Back up and sync transactions across devices using Firebase Firestore or a REST API
+- **Firestore cloud sync** — Firebase Firestore is already added as a dependency; syncing per-user Room data to Firestore for multi-device access is the natural next step
 - **Explicit Room migrations** — Replace `fallbackToDestructiveMigration()` with versioned migration scripts before production
 - **Biometric lock** — Fingerprint / face unlock to protect sensitive financial data
 - **Widgets** — Home screen balance and quick-add widgets via Glance API
@@ -961,8 +1089,9 @@ The commands below will execute those stubs successfully but do not verify any a
 - **Accessibility** — Better content descriptions, larger touch targets, TalkBack testing
 - **Tablet layout** — Two-pane adaptive layout for large screens
 - **More languages** — Chinese, Japanese, Thai localization
-- **Unit and integration tests** — Current test coverage is minimal; full ViewModel and repository test suites needed
+- **Unit and integration tests** — Current test coverage is minimal; full ViewModel, repository, and auth flow test suites needed
 - **Custom recurring frequencies** — "Every 3rd Friday" or "Twice a month" patterns
+- **Google Sign-In** — Social login option alongside email/password
 
 </details>
 
@@ -1000,11 +1129,23 @@ The commands below will execute those stubs successfully but do not verify any a
 
 **Solution:** Navigation Compose 2.8.x with `@Serializable` data class routes. Each destination is a Kotlin data class with properly typed nullable fields. The Kotlin serialization plugin handles serialization/deserialization of route arguments automatically, catching type mismatches at compile time.
 
-### Challenge 6: Runtime Language Switching
+### Challenge 6: Runtime Language Switching and First-Launch Default
 
-**Problem:** Android requires an `Activity` restart to change the app locale. Forcing a restart mid-session is jarring, and the standard `LocaleManager` API (API 33+) doesn't cover the minSdk 26 target.
+**Problem:** Android requires an `Activity` restart to change the app locale. The standard `LocaleManager` API (API 33+) doesn't cover the minSdk 26 target. Additionally, the app must display Vietnamese on first launch even before the user has set any preference.
 
-**Solution:** `LocaleHelper` updates the `Configuration.locale` of the `Application` context before `setContent{}` in `MainActivity`. When the user changes language in Settings, the preference is saved to DataStore and `MainActivity` is recreated via `recreate()`, applying the new locale on the next lifecycle start.
+**Solution:** `LocaleHelper` stores the selected language in `SharedPreferences` (not in Firebase/DataStore, so it's always available synchronously). `LocaleHelper.getLanguage()` defaults to `"vi"` when no stored value exists, so the very first call in `attachBaseContext()` applies Vietnamese before any UI is inflated. When the user selects English in Settings, `LocaleHelper.setLanguage("en")` writes to `SharedPreferences` and `Activity.recreate()` re-applies the locale. The value is also mirrored to `UserPreferencesDataStore` for reactive observation in Settings.
+
+### Challenge 7: Per-User Data Isolation Without Foreign Keys to Firebase
+
+**Problem:** Room is a local SQLite database with no awareness of Firebase user identities. Enforcing per-user data isolation at the database level without a cloud foreign key mechanism requires careful design.
+
+**Solution:** Every user-owned entity stores a `userId: String` column set to the Firebase UID at insert time. `CurrentUserProvider` (a `@Singleton` backed by `AuthRepository.currentUser?.uid`) is injected into all repositories. DAOs filter every SELECT query by `WHERE userId = :userId`. When the user signs out, `currentUser` returns `null`, the UID falls back to `""`, and all DAO queries return empty results — data belonging to one account is never visible to another. On sign-in as a different account, the UID changes and the new user's data (or freshly seeded defaults) is shown immediately, without clearing the previous user's rows from the database.
+
+### Challenge 8: Localized Firebase Error Messages
+
+**Problem:** Firebase Authentication throws exceptions with English error messages (and internal error codes like `"ERROR_USER_NOT_FOUND"`). Surfacing these raw to the UI breaks the Vietnamese user experience.
+
+**Solution:** `AuthRepositoryImpl` catches all Firebase exceptions and maps them to subclasses of the `AuthException` sealed class (`WeakPassword`, `EmailAlreadyInUse`, `WrongPassword`, `UserNotFound`, `NetworkError`, etc.) — pure Kotlin with no string content. `AuthViewModel` injects `@ApplicationContext` and maps each `AuthException` subtype to a string resource ID, calling `context.getString(R.string.auth_error_*)`. This keeps the data layer free of UI concerns while ensuring all error messages are fully translated into the active language.
 
 </details>
 
@@ -1018,8 +1159,14 @@ This project was built as a university final project for the **Mobile Developmen
 
 **Android Architecture**
 - Implemented Clean Architecture with strict layer separation in a real project, not just in theory
-- Applied MVVM with `StateFlow`-based unidirectional data flow throughout 12 feature modules
+- Applied MVVM with `StateFlow`-based unidirectional data flow throughout 13 feature modules
 - Used Hilt for constructor injection across the full stack (Activities, ViewModels, Workers, Repositories)
+
+**Firebase and Authentication**
+- Integrated Firebase Authentication (email/password, password reset) into a Clean Architecture app
+- Designed a reactive auth gate at the `MainActivity` level using `callbackFlow` and `AuthStateListener`
+- Mapped Firebase-specific exception types to domain-level sealed classes to keep the data layer decoupled from the UI
+- Implemented per-user data isolation in a local SQLite database using a `userId` column and a `CurrentUserProvider` singleton
 
 **Jetpack Compose**
 - Built a complete production app entirely in Compose, including custom components, animations, charts, and the camera preview
@@ -1027,7 +1174,7 @@ This project was built as a university final project for the **Mobile Developmen
 - Integrated Material 3 design tokens, dynamic color, and dark mode
 
 **Data Layer**
-- Designed a normalized relational schema with 7 tables and appropriate indexes
+- Designed a normalized relational schema with 7 tables, userId-based isolation, and appropriate indexes
 - Used Room type converters, database callbacks for seeding, and `Flow`-based reactive queries
 - Persisted user preferences with DataStore and designed a comprehensive `UserPreferences` model
 
@@ -1042,8 +1189,9 @@ This project was built as a university final project for the **Mobile Developmen
 - Handled the daily reminder scheduling with calculated initial delay to target a specific time of day
 
 **Localization**
-- Fully localized a non-trivial app (243 strings) in Vietnamese without breaking any references
-- Implemented runtime language switching with locale configuration override
+- Fully localized a non-trivial app (~300 strings) in Vietnamese without breaking any references
+- Implemented runtime language switching with locale configuration override applied at `attachBaseContext()` before any UI is inflated
+- Set Vietnamese as the default language for first-launch (including pre-login screens) by controlling the `SharedPreferences` fallback
 
 **OCR and ML**
 - Combined on-device ML (ML Kit) with cloud AI (Gemini) for a robust two-stage pipeline

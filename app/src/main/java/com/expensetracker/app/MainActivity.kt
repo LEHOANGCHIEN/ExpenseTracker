@@ -12,6 +12,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.expensetracker.app.core.designsystem.theme.ExpenseTrackerTheme
 import com.expensetracker.app.core.util.LocaleHelper
+import com.expensetracker.app.data.bootstrap.UserBootstrapService
 import com.expensetracker.app.domain.repository.AuthRepository
 import com.expensetracker.app.domain.repository.PreferencesRepository
 import com.expensetracker.app.feature.shell.AppShell
@@ -29,6 +30,9 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var authRepository: AuthRepository
+
+    @Inject
+    lateinit var userBootstrapService: UserBootstrapService
 
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(LocaleHelper.applyLocale(newBase))
@@ -54,6 +58,15 @@ class MainActivity : ComponentActivity() {
                         LocaleHelper.setLanguage(this@MainActivity, language)
                     }
                 }
+            }
+
+            // Triggers bootstrap/pull when the app starts with an existing authenticated session
+            // (e.g. fresh install where Firebase token is cached, or cleared app data).
+            // The mutex inside bootstrapIfNeeded serializes this with the sign-in path so there
+            // is no race: whichever runs second finds local count > 0 and returns immediately.
+            LaunchedEffect(authUser?.uid) {
+                val uid = authUser?.uid ?: return@LaunchedEffect
+                userBootstrapService.bootstrapIfNeeded(uid)
             }
 
             if (prefs != null) {

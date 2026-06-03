@@ -4,6 +4,7 @@ import com.expensetracker.app.data.local.CurrentUserProvider
 import com.expensetracker.app.data.local.dao.WalletDao
 import com.expensetracker.app.data.mapper.toDomain
 import com.expensetracker.app.data.mapper.toEntity
+import com.expensetracker.app.data.remote.firestore.FirestoreSyncService
 import com.expensetracker.app.domain.model.Wallet
 import com.expensetracker.app.domain.repository.WalletRepository
 import kotlinx.coroutines.flow.Flow
@@ -15,6 +16,7 @@ import javax.inject.Singleton
 class WalletRepositoryImpl @Inject constructor(
     private val walletDao: WalletDao,
     private val currentUserProvider: CurrentUserProvider,
+    private val firestoreSyncService: FirestoreSyncService,
 ) : WalletRepository {
 
     override fun observeAll(): Flow<List<Wallet>> =
@@ -29,12 +31,21 @@ class WalletRepositoryImpl @Inject constructor(
     override suspend fun getById(id: Long): Wallet? =
         walletDao.getById(id)?.toDomain()
 
-    override suspend fun add(wallet: Wallet): Long =
-        walletDao.insert(wallet.toEntity().copy(userId = currentUserProvider.uid))
+    override suspend fun add(wallet: Wallet): Long {
+        val entity = wallet.toEntity().copy(userId = currentUserProvider.uid)
+        val id = walletDao.insert(entity)
+        firestoreSyncService.pushWallet(entity.copy(id = id))
+        return id
+    }
 
-    override suspend fun update(wallet: Wallet) =
-        walletDao.update(wallet.toEntity().copy(userId = currentUserProvider.uid))
+    override suspend fun update(wallet: Wallet) {
+        val entity = wallet.toEntity().copy(userId = currentUserProvider.uid)
+        walletDao.update(entity)
+        firestoreSyncService.pushWallet(entity)
+    }
 
-    override suspend fun delete(id: Long) =
+    override suspend fun delete(id: Long) {
         walletDao.deleteById(id)
+        firestoreSyncService.deleteWallet(id)
+    }
 }

@@ -7,6 +7,7 @@ import com.expensetracker.app.data.local.CurrentUserProvider
 import com.expensetracker.app.data.local.dao.TransactionDao
 import com.expensetracker.app.data.mapper.toDomain
 import com.expensetracker.app.data.mapper.toEntity
+import com.expensetracker.app.data.remote.firestore.FirestoreSyncService
 import com.expensetracker.app.data.worker.BudgetCheckWorker
 import com.expensetracker.app.domain.model.Transaction
 import com.expensetracker.app.domain.model.TransactionType
@@ -22,6 +23,7 @@ import javax.inject.Singleton
 class TransactionRepositoryImpl @Inject constructor(
     private val transactionDao: TransactionDao,
     private val currentUserProvider: CurrentUserProvider,
+    private val firestoreSyncService: FirestoreSyncService,
     @ApplicationContext private val context: Context,
 ) : TransactionRepository {
 
@@ -53,7 +55,9 @@ class TransactionRepositoryImpl @Inject constructor(
         transactionDao.getById(id)?.toDomain()
 
     override suspend fun add(transaction: Transaction): Long {
-        val id = transactionDao.insert(transaction.toEntity().copy(userId = currentUserProvider.uid))
+        val entity = transaction.toEntity().copy(userId = currentUserProvider.uid)
+        val id = transactionDao.insert(entity)
+        firestoreSyncService.pushTransaction(entity.copy(id = id))
         if (transaction.type == TransactionType.EXPENSE) {
             enqueueBudgetCheck(transaction.categoryId)
         }
@@ -61,18 +65,26 @@ class TransactionRepositoryImpl @Inject constructor(
     }
 
     override suspend fun update(transaction: Transaction) {
-        transactionDao.update(transaction.toEntity().copy(userId = currentUserProvider.uid))
+        val entity = transaction.toEntity().copy(userId = currentUserProvider.uid)
+        transactionDao.update(entity)
+        firestoreSyncService.pushTransaction(entity)
         if (transaction.type == TransactionType.EXPENSE) {
             enqueueBudgetCheck(transaction.categoryId)
         }
     }
 
-    override suspend fun delete(id: Long) =
+    override suspend fun delete(id: Long) {
         transactionDao.deleteById(id)
+        firestoreSyncService.deleteTransaction(id)
+    }
 
     override suspend fun split(parentId: Long, children: List<Transaction>) {
         val uid = currentUserProvider.uid
-        transactionDao.insertAll(children.map { it.copy(parentSplitId = parentId).toEntity().copy(userId = uid) })
+        val entities = children.map { it.copy(parentSplitId = parentId).toEntity().copy(userId = uid) }
+        val ids = transactionDao.insertAll(entities)
+        ids.forEachIndexed { index, newId ->
+            if (newId != -1L) firestoreSyncService.pushTransaction(entities[index].copy(id = newId))
+        }
     }
 
     private fun enqueueBudgetCheck(categoryId: Long) {

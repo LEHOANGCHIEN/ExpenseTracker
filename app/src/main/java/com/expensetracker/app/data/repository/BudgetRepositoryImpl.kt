@@ -4,6 +4,7 @@ import com.expensetracker.app.data.local.CurrentUserProvider
 import com.expensetracker.app.data.local.dao.BudgetDao
 import com.expensetracker.app.data.mapper.toDomain
 import com.expensetracker.app.data.mapper.toEntity
+import com.expensetracker.app.data.remote.firestore.FirestoreSyncService
 import com.expensetracker.app.domain.model.Budget
 import com.expensetracker.app.domain.repository.BudgetRepository
 import kotlinx.coroutines.flow.Flow
@@ -15,6 +16,7 @@ import javax.inject.Singleton
 class BudgetRepositoryImpl @Inject constructor(
     private val budgetDao: BudgetDao,
     private val currentUserProvider: CurrentUserProvider,
+    private val firestoreSyncService: FirestoreSyncService,
 ) : BudgetRepository {
 
     override fun observeAll(): Flow<List<Budget>> =
@@ -29,12 +31,21 @@ class BudgetRepositoryImpl @Inject constructor(
     override suspend fun getById(id: Long): Budget? =
         budgetDao.getById(id)?.toDomain()
 
-    override suspend fun add(budget: Budget): Long =
-        budgetDao.insert(budget.toEntity().copy(userId = currentUserProvider.uid))
+    override suspend fun add(budget: Budget): Long {
+        val entity = budget.toEntity().copy(userId = currentUserProvider.uid)
+        val id = budgetDao.insert(entity)
+        firestoreSyncService.pushBudget(entity.copy(id = id))
+        return id
+    }
 
-    override suspend fun update(budget: Budget) =
-        budgetDao.update(budget.toEntity().copy(userId = currentUserProvider.uid))
+    override suspend fun update(budget: Budget) {
+        val entity = budget.toEntity().copy(userId = currentUserProvider.uid)
+        budgetDao.update(entity)
+        firestoreSyncService.pushBudget(entity)
+    }
 
-    override suspend fun delete(id: Long) =
+    override suspend fun delete(id: Long) {
         budgetDao.deleteById(id)
+        firestoreSyncService.deleteBudget(id)
+    }
 }

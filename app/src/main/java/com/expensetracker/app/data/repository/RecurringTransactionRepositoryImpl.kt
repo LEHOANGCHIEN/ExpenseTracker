@@ -4,6 +4,7 @@ import com.expensetracker.app.data.local.CurrentUserProvider
 import com.expensetracker.app.data.local.dao.RecurringTransactionDao
 import com.expensetracker.app.data.mapper.toDomain
 import com.expensetracker.app.data.mapper.toEntity
+import com.expensetracker.app.data.remote.firestore.FirestoreSyncService
 import com.expensetracker.app.domain.model.RecurringTransaction
 import com.expensetracker.app.domain.repository.RecurringTransactionRepository
 import kotlinx.coroutines.flow.Flow
@@ -16,6 +17,7 @@ import javax.inject.Singleton
 class RecurringTransactionRepositoryImpl @Inject constructor(
     private val recurringTransactionDao: RecurringTransactionDao,
     private val currentUserProvider: CurrentUserProvider,
+    private val firestoreSyncService: FirestoreSyncService,
 ) : RecurringTransactionRepository {
 
     override fun observeAll(): Flow<List<RecurringTransaction>> =
@@ -30,12 +32,21 @@ class RecurringTransactionRepositoryImpl @Inject constructor(
     override suspend fun getById(id: Long): RecurringTransaction? =
         recurringTransactionDao.getById(id)?.toDomain()
 
-    override suspend fun add(recurringTransaction: RecurringTransaction): Long =
-        recurringTransactionDao.insert(recurringTransaction.toEntity().copy(userId = currentUserProvider.uid))
+    override suspend fun add(recurringTransaction: RecurringTransaction): Long {
+        val entity = recurringTransaction.toEntity().copy(userId = currentUserProvider.uid)
+        val id = recurringTransactionDao.insert(entity)
+        firestoreSyncService.pushRecurring(entity.copy(id = id))
+        return id
+    }
 
-    override suspend fun update(recurringTransaction: RecurringTransaction) =
-        recurringTransactionDao.update(recurringTransaction.toEntity().copy(userId = currentUserProvider.uid))
+    override suspend fun update(recurringTransaction: RecurringTransaction) {
+        val entity = recurringTransaction.toEntity().copy(userId = currentUserProvider.uid)
+        recurringTransactionDao.update(entity)
+        firestoreSyncService.pushRecurring(entity)
+    }
 
-    override suspend fun delete(id: Long) =
+    override suspend fun delete(id: Long) {
         recurringTransactionDao.deleteById(id)
+        firestoreSyncService.deleteRecurring(id)
+    }
 }
